@@ -1,4 +1,4 @@
-![icon-0](https://github.com/deeffest/DEEF-Lite-Media-Player/assets/117280555/206335b3-53db-47e2-a203-6fc762471baf)
+![icon-0](https://github.com/deeffest/DEEF-Lite-Media-Player/assets/117280555/176ed8a3-86d5-4e9d-8663-12050e924032)
 
 # DEEF-Lite-Media-Player
 
