@@ -11,7 +11,7 @@ Supported media formats (the list is frequently updated): \
 
 ![image](https://github.com/deeffest/DEEF-Lite-Media-Player/assets/117280555/05e5619c-e225-4ebc-8b70-f2e62a59a920)
 
-## Download
+## Start using
 
 1. Download and install [LAV Filters](https://github.com/Nevcairiel/LAVFilters/releases/download/0.78/LAVFilters-0.78-Installer.exe)
 
