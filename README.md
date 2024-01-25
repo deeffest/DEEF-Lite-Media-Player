@@ -13,14 +13,9 @@ Supported media formats (the list is frequently updated): \
 
 ## Download
 
-Distributed as a binary (exe) file: https://github.com/deeffest/DEEF-Lite-Media-Player/releases/
+1. Download and install [LAV Filters](https://github.com/Nevcairiel/LAVFilters/releases/download/0.78/LAVFilters-0.78-Installer.exe)
 
-## Install
-It's simple! 
-
-1. Go to the directory where you downloaded DLMPlayer-Setup.exe
-
-2. Open this file and enjoy playing media with DLMPlayer!
+2. Download and install `DLMPlayer-Setup.exe` from the releases page: https://github.com/deeffest/DEEF-Lite-Media-Player/releases
 
 ## Use DLMPlayer as default media player in Windows
 
