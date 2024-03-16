@@ -1,6 +1,4 @@
-#main.py
 from PyQt5.QtWidgets import QApplication
-from PyQt5.QtMultimedia import QMediaPlayer
 from PyQt5.QtCore import QSettings, Qt
 from PyQt5.QtGui import QPalette, QColor
 import os
