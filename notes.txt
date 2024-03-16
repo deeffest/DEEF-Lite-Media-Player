@@ -1,6 +1,6 @@
 1.1 Update!
 - Changed and improved application component styles.
-- Removed the ability to change the application theme style, now the Classic style will always be used by default.
+- Removed the ability to change the application theme style, now the Fusion style will always be used by default.
 - Fixed a bug where switching to "Top of all windows" mode hid the window from the user's view.
 - Added the ability to enable the tray when closing the main window.
 - Fixed a bug that when opening a folder, other multimedia from other folders in the open folder were added to the playlist
