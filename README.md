@@ -2,7 +2,7 @@
 
 # DEEF-Lite-Media-Player
 
-A simple App for playing media files on your Windows PC, written in [PyQt5](https://www.riverbankcomputing.com/software/pyqt/intro).
+A simple App for playing media files on your Windows PC, written in [PyQt5](https://www.riverbankcomputing.com/software/pyqt/intro) and its QMediaPlayer.
 
 Supported media formats (the list is frequently updated): \
  `mp3`, `wav`, `ogg`, `flac`, `aac`, `wma`, `m4a`, `opus`, `webm`, `mp4`, `avi`, `mov`, `m3u`, `3gpp`, and `mkv`
