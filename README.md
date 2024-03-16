@@ -16,7 +16,7 @@ Supported media formats (the list is frequently updated): \
 1. Download and install [LAV Filters](https://github.com/Nevcairiel/LAVFilters/releases/download/0.78/LAVFilters-0.78-Installer.exe) 
 2. Download and install `DLMPlayer-Setup.exe` from the releases page: https://github.com/deeffest/DEEF-Lite-Media-Player/releases
 
->To use DLMPlayer without LAV Filters, you need to set Windows Media Foundation as "Preferred multimedia plugin" in the "Player"    settings, instead of the default DirectShow._
+>To use DLMPlayer without LAV Filters, you need to set Windows Media Foundation as "Preferred multimedia plugin" in the "Player" settings, instead of the default DirectShow.
 
 ## Use DLMPlayer as default media player in Windows
 
