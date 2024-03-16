@@ -1,4 +1,3 @@
-#video_widget.py
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtWidgets import QSizePolicy, QMenu, QAction
 from PyQt5.QtCore import QTimer, Qt
@@ -40,8 +39,11 @@ class VideoWidget(QVideoWidget):
         contextMenu.addMenu(menuPlaylist)
         contextMenu.addSeparator()     
 
-        menuView = self.window.menuView
-        contextMenu.addMenu(menuView)
+        for action in self.window.menuView.actions():
+            if isinstance(action, QMenu):
+                contextMenu.addMenu(action.menu())
+            else:
+                contextMenu.addAction(action)
         contextMenu.addSeparator()
 
         menuHelp = self.window.menuHelp
@@ -86,9 +88,9 @@ class VideoWidget(QVideoWidget):
         self.contextMenuActive = False
 
         if event.buttons() == Qt.LeftButton and self.drag_position:
+            if not self.isDragging: 
+                self.isDragging = True 
             if not self.window.isFullScreen():
-                if not self.isDragging: 
-                    self.isDragging = True 
                 if self.window.settings.value("movable_window", True) == 'true':
                     self.window.move(event.globalPos() - self.drag_position)
         
@@ -110,9 +112,8 @@ class VideoWidget(QVideoWidget):
         super(VideoWidget, self).mouseMoveEvent(event) 
 
     def mousePressEvent(self, event: QMouseEvent):
-        if not self.window.isFullScreen():  
-            self.drag_position = event.globalPos() - self.window.frameGeometry().topLeft()
-            self.isDragging = False
+        self.drag_position = event.globalPos() - self.window.frameGeometry().topLeft()
+        self.isDragging = False
         super(VideoWidget, self).mousePressEvent(event)
         
     def mouseReleaseEvent(self, event: QMouseEvent):
@@ -122,9 +123,8 @@ class VideoWidget(QVideoWidget):
                     self.contextMenuActive = False
                 else:
                     self.window.play_pause_media()
-            if not self.window.isFullScreen():  
-                self.drag_position = event.globalPos() - self.window.frameGeometry().topLeft()
-                self.isDragging = False 
+            self.drag_position = event.globalPos() - self.window.frameGeometry().topLeft()
+            self.isDragging = False 
                 
         super(VideoWidget, self).mouseReleaseEvent(event)
 

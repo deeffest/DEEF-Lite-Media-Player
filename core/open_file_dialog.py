@@ -1,4 +1,3 @@
-#open_file_dialog.py
 from PyQt5.QtWidgets import (QDialog, QDialogButtonBox, QFileDialog,
     QMessageBox
 )
@@ -42,7 +41,7 @@ class OpenFileDlg(QDialog):
 
         self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(bool(self.lineEdit.text()))
 
-        self.label_2.setPixmap(QPixmap(f"{self.current_dir}/resources/icons/{self.window.icon_folder}/link_white_24dp.svg"))
+        self.label_2.setPixmap(QPixmap(f"{self.current_dir}/resources/icons/{self.window.theme}/link_white_24dp.svg"))
 
     def _init_connect(self):
         self.buttonBox.button(
@@ -62,6 +61,8 @@ class OpenFileDlg(QDialog):
         self.buttonBox.button(QDialogButtonBox.Ok).setEnabled(bool(text))
 
     def open_url_media(self):
+        self.window.playlist_cleaner()
+        
         urls = self.lineEdit.text().split('; ')
         if len(urls):
             for url in urls:

@@ -1,6 +1,4 @@
-#properties_dialog.py
-from PyQt5.QtWidgets import (QDialog, QDialogButtonBox, QMessageBox
-)
+from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QMessageBox
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.uic import loadUi
@@ -41,7 +39,7 @@ class PropertiesDlg(QDialog):
     def _init_content(self):
         self.get_file_properties(self.file_path)
 
-        self.label_2.setPixmap(QPixmap(f"{self.current_dir}/resources/icons/{self.window.icon_folder}/info_white_24dp.svg"))
+        self.label_2.setPixmap(QPixmap(f"{self.current_dir}/resources/icons/{self.window.theme}/info_white_24dp.svg"))
 
     def _init_connect(self):
         self.buttonBox.accepted.connect(self.close)

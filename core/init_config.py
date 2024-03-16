@@ -1,6 +1,4 @@
-#init_config.py
 from PyQt5.QtCore import Qt
-from core.init_icons import _init_icons
 
 def _init_config(self):        
 	if self.settings.value("preset_1", False) == "true":
@@ -26,10 +24,3 @@ def _init_config(self):
 		self.setWindowFlags(Qt.WindowStaysOnTopHint)
 		self.actionOn_Top.setChecked(True)
 		self.show()
-
-	theme = self.settings.value("app_theme", "dark")
-	if theme == "dark":
-		self.icon_folder = "dark_icons"
-	else:
-		self.icon_folder = "light_icons"
-	_init_icons(self, self.icon_folder, theme=theme)

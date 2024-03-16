@@ -1,28 +1,22 @@
-#main_window.py
-from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QFileDialog, QMessageBox, 
-    QListWidgetItem, QShortcut, QWidget, QWidgetAction,
-    QAction, QMenu
-)
-from PyQt5.QtGui import (
-    QIcon, QKeySequence, QColor, QBrush, QPixmap
-)
-from PyQt5.QtMultimedia import (
-    QMediaContent, QMediaPlayer, QMediaStreamsControl
-)
-from PyQt5.QtCore import (
-    QUrl, QTimer, Qt, QProcess, QCoreApplication, QEvent,
-    QSize
-)
-from PyQt5.QtWinExtras import (
-    QWinThumbnailToolBar, QWinThumbnailToolButton  
-)
-
-from PyQt5 import uic
 import os, sys
 import webbrowser
 import random 
 import requests
+
+from PyQt5.QtWidgets import (
+    qApp, QMainWindow, QFileDialog, QMessageBox,
+    QListWidgetItem, QWidget, QWidgetAction, 
+    QMenu
+)
+from PyQt5.QtGui import QIcon
+from PyQt5.QtMultimedia import (
+    QMediaContent, QMediaPlayer
+)
+from PyQt5.QtCore import QUrl, Qt, QSize
+from PyQt5.QtWinExtras import (
+    QWinThumbnailToolBar, QWinThumbnailToolButton  
+)
+from PyQt5 import uic
 
 from core.open_file_dialog import OpenFileDlg
 from core.go_to_dialog import GoToDlg
@@ -34,6 +28,7 @@ from core.init_connect import _init_connect
 from core.init_shortcuts import _init_shortcuts
 from core.init_config import _init_config
 from core.init_icons import _init_icons
+from core.tray_icon import TrayIcon
 
 class Window(QMainWindow):
     def __init__(
@@ -74,7 +69,8 @@ class Window(QMainWindow):
 
         self.create_win_toolbar_buttons()
         self.create_playlist_menu()
-        
+        self._init_tray_icon()
+
         if self.file_path is None:
             pass
         else:
@@ -82,27 +78,26 @@ class Window(QMainWindow):
 
         _init_connect(self)
         _init_shortcuts(self)
-        _init_config(self)   
+        _init_config(self)
 
     def _init_attributes(self):
         self.playback_speed = 1.0
         self.media_muted = False
         self.media_volume = self.settings.value("media_volume", 100)
+        self.change_media_volume(value=None, player=False)
         self.horizontalSlider_2.setValue(self.media_volume)
+        self.setAcceptDrops(True)
 
-        theme = self.settings.value("app_theme", "dark")
-        if theme == "dark":
-            self.icon_folder = "dark_icons"
-        else:
-            self.icon_folder = "light_icons"
-        _init_icons(self, self.icon_folder, theme=theme)
+        self.theme = self.settings.value("app_theme", "dark")
+        _init_icons(self, theme=self.theme)
 
     def open_media(self, file_path):
         self.file_path = file_path
         self.setWindowTitle(f"{self.file_path} - {self.name}")
+        self.tray_icon.setToolTip(self.file_path)
         self.label_3.setText("/")
         self.control_ui_elements(setEnabled=True)
-
+        
         if file_path.lower().endswith('.m3u'):
             self.open_playlist(file_path)
         else:
@@ -131,6 +126,9 @@ class Window(QMainWindow):
         self.setCursor(Qt.ArrowCursor)
         self.set_playlist()
 
+        self.video_widget.hide()
+        self.video_widget.show()
+
     def set_playlist(self):    
         item = QListWidgetItem(self.file_path)
         item.setToolTip(item.text())  
@@ -144,7 +142,7 @@ class Window(QMainWindow):
             item = self.playlistUiWidget.listWidget.item(i)
             if item in playing_items:
                 item.setIcon(QIcon(
-                    f"{self.current_dir}/resources/icons/{self.icon_folder}/play_arrow_white_24dp.svg"
+                    f"{self.current_dir}/resources/icons/{self.theme}/play_arrow_white_24dp.svg"
                 ))
                 item.setSelected(True)
             else:
@@ -182,15 +180,16 @@ class Window(QMainWindow):
         if duration-position > 10000:
             self.player.setPosition(min(duration, position + 10 * 1000))
 
-    def change_media_volume(self, value):
-        self.player.setVolume(value)
-        self.horizontalSlider_2.setValue(value)
-        self.media_volume = value
+    def change_media_volume(self, value=None, player=None):
+        if player:
+            self.player.setVolume(value)
+        if value:
+            self.horizontalSlider_2.setValue(value)
+            self.media_volume = value
             
         if self.media_volume <= 0:
             self.actionDown_2.setEnabled(False)
             self.actionUp_2.setEnabled(True)
-
         elif self.media_volume >= 100:
             self.actionUp_2.setEnabled(False)
             self.actionDown_2.setEnabled(True)
@@ -221,21 +220,21 @@ class Window(QMainWindow):
         if status == QMediaPlayer.PlayingState:
             self.toolButton_2.setChecked(False)
             self.tool_btn_play_pause.setIcon(QIcon(
-                f"{self.current_dir}/resources/icons/dark_icons/pause_white_24dp.svg"
+                f"{self.current_dir}/resources/icons/dark/pause_white_24dp.svg"
             ))
             self.actionPlay_Pause.setChecked(False)
 
         elif status == QMediaPlayer.PausedState:
             self.toolButton_2.setChecked(True)
             self.tool_btn_play_pause.setIcon(QIcon(
-                f"{self.current_dir}/resources/icons/dark_icons/play_arrow_white_24dp.svg"
+                f"{self.current_dir}/resources/icons/dark/play_arrow_white_24dp.svg"
             ))
             self.actionPlay_Pause.setChecked(True)
 
         elif status == QMediaPlayer.StoppedState:
             self.toolButton_2.setChecked(True)
             self.tool_btn_play_pause.setIcon(QIcon(
-                f"{self.current_dir}/resources/icons/dark_icons/play_arrow_white_24dp.svg"
+                f"{self.current_dir}/resources/icons/dark/play_arrow_white_24dp.svg"
             ))
             self.actionPlay_Pause.setChecked(True)
 
@@ -290,7 +289,7 @@ class Window(QMainWindow):
                 item = self.playlistUiWidget.listWidget.item(i)
                 if item in playing_items:
                     item.setIcon(QIcon(
-                        f"{self.current_dir}/resources/icons/{self.icon_folder}/play_arrow_white_24dp.svg"
+                        f"{self.current_dir}/resources/icons/{self.theme}/play_arrow_white_24dp.svg"
                     ))
                     item.setSelected(True)
                 else:
@@ -298,6 +297,8 @@ class Window(QMainWindow):
                     item.setSelected(False)
 
     def save_playlist_as_m3u(self):
+        self.show()
+
         file_name, _ = QFileDialog.getSaveFileName(
             self, 
             "Save Playlist", 
@@ -313,6 +314,7 @@ class Window(QMainWindow):
                 playlist_file.write(f"{item.text()}\n")
 
     def open_settings_dialog(self):
+        self.show()
         Dlg = SettingsDlg(
             self.current_dir,
             self.name,
@@ -323,22 +325,13 @@ class Window(QMainWindow):
             )
         Dlg.exec_()
 
-    def handle_on_top_window(self, checked=None):
-        if checked:
-            self.setWindowFlags(Qt.WindowStaysOnTopHint)
+    def handle_on_top_window(self):
+        if self.windowFlags() & Qt.WindowStaysOnTopHint:
+            self.setWindowFlag(Qt.WindowStaysOnTopHint, False)
+            self.settings.setValue("on_top_window", False) 
+        else:
+            self.setWindowFlag(Qt.WindowStaysOnTopHint)
             self.settings.setValue("on_top_window", True) 
-        elif checked == False:
-            self.setWindowFlags(Qt.Window)
-            self.settings.setValue("on_top_window", False)  
-        elif checked is None:
-            if self.actionOn_Top.isChecked():
-                self.setWindowFlags(Qt.Window)
-                self.settings.setValue("on_top_window", False) 
-                self.actionOn_Top.setChecked(False) 
-            else:                
-                self.setWindowFlags(Qt.WindowStaysOnTopHint)
-                self.settings.setValue("on_top_window", True)
-                self.actionOn_Top.setChecked(True)
         self.show()
 
     def handle_movable_window(self, checked=None):
@@ -396,23 +389,23 @@ class Window(QMainWindow):
 
     def increase_media_volume(self):
         if self.media_volume < 100:
-            self.media_volume += 25
+            self.media_volume += 15
             if self.media_volume >= 100:
                 self.media_volume = 100
                 self.actionUp_2.setEnabled(False)
             self.actionDown_2.setEnabled(True)
 
-        self.change_media_volume(self.media_volume)
+        self.change_media_volume(self.media_volume, player=True)
 
     def decrease_media_volume(self):
         if self.media_volume > 0:
-            self.media_volume -= 25
+            self.media_volume -= 15
             if self.media_volume <= 0:
                 self.media_volume = 0
                 self.actionDown_2.setEnabled(False)
             self.actionUp_2.setEnabled(True)
         
-        self.change_media_volume(self.media_volume)
+        self.change_media_volume(self.media_volume, player=True)
 
     def toggle_media_mute(self):
         self.media_muted = not self.media_muted
@@ -501,7 +494,7 @@ class Window(QMainWindow):
             return
 
         menu = QMenu()
-        open_action = menu.addAction("Open File")
+        open_action = menu.addAction("Play")
         menu.addSeparator()
         remove_action = menu.addAction("Remove from Playlist")
         action = menu.exec_(self.playlistUiWidget.listWidget.viewport().mapToGlobal(position))
@@ -557,6 +550,8 @@ class Window(QMainWindow):
             status_label.setText("")
 
     def open_file_dialog(self):
+        self.show()
+
         options = QFileDialog.Options()
         options |= QFileDialog.ReadOnly
         file_name, _ = QFileDialog.getOpenFileName(
@@ -567,9 +562,12 @@ class Window(QMainWindow):
             options=options
         )
         if file_name:
+            self.playlist_cleaner()
             self.open_media(file_name)
 
     def open_folder_dialog(self):
+        self.show()
+
         options = QFileDialog.Options()
         options |= QFileDialog.ShowDirsOnly
         directory = QFileDialog.getExistingDirectory(
@@ -581,16 +579,16 @@ class Window(QMainWindow):
         if directory:     
             file_paths = []
 
-            for root, dirs, files in os.walk(directory):
-                for file in files:
-                    file_path = os.path.join(root, file)
+            for file in os.listdir(directory):
+                file_path = os.path.join(directory, file)
+                if os.path.isfile(file_path):
                     ext = file_path.rsplit(".", 1)[-1].lower()
 
                     if ext in self.filter_ and ext != "m3u":
                         file_paths.append(file_path)
 
             if file_paths:
-                self.playlistUiWidget.listWidget.clear()
+                self.playlist_cleaner()
                 for path in file_paths:
                     self.add_to_playlist(path)
                 self.open_media(file_paths[0])
@@ -622,23 +620,23 @@ class Window(QMainWindow):
 
         if setEnabled:
             self.tool_btn_previous.setIcon(QIcon(
-                f"{self.current_dir}/resources/icons/dark_icons/skip_previous_white_24dp.svg"
+                f"{self.current_dir}/resources/icons/dark/skip_previous_white_24dp.svg"
             ))
             self.tool_btn_play_pause.setIcon(QIcon(
-                f"{self.current_dir}/resources/icons/dark_icons/pause_white_24dp.svg"
+                f"{self.current_dir}/resources/icons/dark/pause_white_24dp.svg"
             ))     
             self.tool_btn_next.setIcon(QIcon(
-                f"{self.current_dir}/resources/icons/dark_icons/skip_next_white_24dp.svg"
+                f"{self.current_dir}/resources/icons/dark/skip_next_white_24dp.svg"
             ))
         else:
             self.tool_btn_previous.setIcon(QIcon(
-                f"{self.current_dir}/resources/icons/disabled_icons/skip_previous_white_24dp.svg"
+                f"{self.current_dir}/resources/icons/disabled/skip_previous_white_24dp.svg"
             ))
             self.tool_btn_play_pause.setIcon(QIcon(
-                f"{self.current_dir}/resources/icons/disabled_icons/pause_white_24dp.svg"
+                f"{self.current_dir}/resources/icons/disabled/pause_white_24dp.svg"
             ))  
             self.tool_btn_next.setIcon(QIcon(
-                f"{self.current_dir}/resources/icons/disabled_icons/skip_next_white_24dp.svg"
+                f"{self.current_dir}/resources/icons/disabled/skip_next_white_24dp.svg"
             ))
             self.check_playlist_items()
             for i in range(self.playlistUiWidget.listWidget.count()):
@@ -652,7 +650,7 @@ class Window(QMainWindow):
         self.tool_btn_previous.setToolTip('Previous')
         self.tool_btn_previous.setEnabled(False)
         self.tool_btn_previous.setIcon(QIcon(
-            f"{self.current_dir}/resources/icons/disabled_icons/skip_previous_white_24dp.svg"
+            f"{self.current_dir}/resources/icons/disabled/skip_previous_white_24dp.svg"
         ))
         self.win_toolbar.addButton(self.tool_btn_previous)
 
@@ -660,7 +658,7 @@ class Window(QMainWindow):
         self.tool_btn_play_pause.setToolTip('Play/Pause')
         self.tool_btn_play_pause.setEnabled(False)
         self.tool_btn_play_pause.setIcon(QIcon(
-            f"{self.current_dir}/resources/icons/disabled_icons/pause_white_24dp.svg"
+            f"{self.current_dir}/resources/icons/disabled/pause_white_24dp.svg"
         ))                     
         self.win_toolbar.addButton(self.tool_btn_play_pause)
 
@@ -668,26 +666,17 @@ class Window(QMainWindow):
         self.tool_btn_next.setToolTip('Next')
         self.tool_btn_next.setEnabled(False)
         self.tool_btn_next.setIcon(QIcon(
-            f"{self.current_dir}/resources/icons/disabled_icons/skip_next_white_24dp.svg"
+            f"{self.current_dir}/resources/icons/disabled/skip_next_white_24dp.svg"
         ))
         self.win_toolbar.addButton(self.tool_btn_next)
 
-    def handle_on_top_window(self, checked=None):
-        if checked:
-            self.setWindowFlags(Qt.WindowStaysOnTopHint)
-            self.settings.setValue("on_top_window", True) 
-        elif checked == False:
-            self.setWindowFlags(Qt.Window)
-            self.settings.setValue("on_top_window", False)  
-        elif checked is None:
-            if self.actionOn_Top.isChecked():
-                self.setWindowFlags(Qt.Window)
-                self.settings.setValue("on_top_window", False) 
-                self.actionOn_Top.setChecked(False) 
-            else:                
-                self.setWindowFlags(Qt.WindowStaysOnTopHint)
-                self.settings.setValue("on_top_window", True)
-                self.actionOn_Top.setChecked(True)
+    def _init_tray_icon(self):
+        self.tray_icon = TrayIcon(            
+            self.current_dir,
+            self.name,
+            self.settings, 
+            parent=self
+        )
 
     def click_on_preset1(self, checked=None):
         if checked:
@@ -757,21 +746,31 @@ class Window(QMainWindow):
                 self.settings.setValue("preset_4", True)
                 self.actionPreset4.setChecked(True)
 
+    def on_slider_enter(self, event):
+        pos = event.pos().x()
+        slider_width = self.horizontalSlider.width() 
+        max_val = min(self.horizontalSlider.maximum(), self.player.duration())
+
+        slider_val = max_val * (pos / slider_width)
+        slider_val = min(max_val, max(0, slider_val))
+
+        self.horizontalSlider.setToolTip(self.format_time(slider_val))
+
     def on_slider_moved(self, event):
         pos = event.pos().x()
         slider_width = self.horizontalSlider.width() 
-        max_val = min(self.horizontalSlider.maximum(), self.player.duration())  # get the slider max value
+        max_val = min(self.horizontalSlider.maximum(), self.player.duration())
 
         slider_val = max_val * (pos / slider_width)
         slider_val = min(max_val, max(0, slider_val))
 
         self.horizontalSlider.setValue(slider_val)  
-        self.set_media_position(slider_val)        
+        self.set_media_position(slider_val)
 
     def on_slider_pressed(self, event):
         pos = event.pos().x() 
         slider_width = self.horizontalSlider.width()
-        max_val = min(self.horizontalSlider.maximum(), self.player.duration())  # get slider max value
+        max_val = min(self.horizontalSlider.maximum(), self.player.duration())
 
         slider_val = max_val * (pos / slider_width)
         slider_val = min(max_val, max(0, slider_val))
@@ -783,12 +782,12 @@ class Window(QMainWindow):
         pos = event.pos().x() 
         slider_width = self.horizontalSlider_2.width()
         max_val = self.horizontalSlider_2.maximum()
-
         slider_val = max_val * (pos / slider_width)
-        slider_val = min(max_val, max(0, slider_val))
 
+        slider_val = min(max_val, max(0, slider_val))
         self.horizontalSlider_2.setValue(slider_val)
-        self.change_media_volume(slider_val)
+
+        self.change_media_volume(slider_val, player=True)
 
     def on_volume_slider_moved(self, event):
         pos = event.pos().x() 
@@ -799,7 +798,7 @@ class Window(QMainWindow):
         slider_val = min(max_val, max(0, slider_val))
 
         self.horizontalSlider_2.setValue(slider_val) 
-        self.change_media_volume(slider_val)
+        self.change_media_volume(slider_val, player=True)
 
     def set_media_position(self, position):
         self.player.setPosition(position)
@@ -810,6 +809,11 @@ class Window(QMainWindow):
         h = m // 60
         s = s % 60
         m = m % 60
+
+        s = int(s)
+        m = int(m)
+        h = int(h)
+
         if show_hours:
             return "{:01d}:{:02d}:{:02d}".format(h, m, s)
         else:
@@ -829,13 +833,14 @@ class Window(QMainWindow):
         show_hours = duration >= 3600000 
         formatted_time = self.format_time(position, show_hours)
         self.label_2.setText(formatted_time)
-        self.horizontalSlider.setValue(position)
+        self.horizontalSlider.setValue(max(0, min(position, 2147483647)))
 
     def open_go_to_dialog(self):
         duration = self.player.duration()
         show_hours = duration >= 3600000 
         current_time_fmt = self.format_time(self.player.position(), show_hours)
 
+        self.show()
         Dlg = GoToDlg(
             self.current_dir,
             self.name,
@@ -849,6 +854,8 @@ class Window(QMainWindow):
         Dlg.exec_()
 
     def open_media_dialog(self):
+        self.show()
+
         Dlg = OpenFileDlg(
             self.current_dir,
             self.name,
@@ -863,6 +870,7 @@ class Window(QMainWindow):
         if self.file_path is not None:
             video_duration_ms = self.format_time(self.player.duration())
             
+            self.show()
             Dlg = PropertiesDlg(
                 self.current_dir,
                 self.name,
@@ -875,6 +883,8 @@ class Window(QMainWindow):
             Dlg.exec_()
 
     def open_about_dialog(self):
+        self.show()
+
         Dlg = AboutDlg(
             self.current_dir,
             self.name,
@@ -885,19 +895,24 @@ class Window(QMainWindow):
             )
         Dlg.exec_()
 
+    def exit_app(self):
+        self.settings.setValue("window_size", self.size())
+        self.settings.setValue("media_volume", self.horizontalSlider_2.value())
+        sys.exit(0)
+
     def check_for_updates(self, startup=None):
-        response = requests.get(
-            "https://api.github.com/repos/deeffest/DEEF-Lite-Media-Player/releases/latest"
-        )
         try:
+            response = requests.get(
+                "https://api.github.com/repos/deeffest/DEEF-Lite-Media-Player/releases/latest"
+            )
             item_version = response.json()["name"]
             item_download = response.json().get("html_url")         
 
             if item_version != self.version:
                 update_msg_box = QMessageBox(self)
                 update_msg_box.setIcon(QMessageBox.Information)
-                update_msg_box.setText(f"The new version of DLMPlayer is out.\n\nYour version: {self.version}\nNew version: {item_version}\n\nWould you like to update now?")
-                update_msg_box.setWindowTitle("New update is available!")
+                update_msg_box.setText(f"New version of DLMPlayer is available!\n\nYour version: {self.version}\nNew version: {item_version}\n\nWould you like to update now?")
+                update_msg_box.setWindowTitle(self.name)
 
                 btn_update = update_msg_box.addButton("Update", QMessageBox.AcceptRole)
                 btn_cancel = update_msg_box.addButton("Cancel", QMessageBox.RejectRole)
@@ -911,7 +926,7 @@ class Window(QMainWindow):
             else:
                 if not startup:
                     QMessageBox.information(self, 
-                        "No new versions found:(", 
+                        self.name, 
                         f"No new versions of DLMPlayer were found.\n\nYour version: {self.version}\nLatest version: {item_version}")
         except Exception as e:
             QMessageBox.critical(self, 
@@ -937,9 +952,44 @@ class Window(QMainWindow):
             self.check_for_updates(startup=True)
 
     def _move_window_to_center(self):    
-        desktop = QApplication.desktop().availableGeometry()
+        desktop = qApp.desktop().availableGeometry()
         w, h = desktop.width(), desktop.height()
         self.move(w//2 - self.width()//2, h//2 - self.height()//2)
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
+
+    def dropEvent(self, event):
+        if event.mimeData().hasUrls():
+            self.playlist_cleaner()
+            file_paths = []
+            for url in event.mimeData().urls():
+                file_path = url.toLocalFile()
+                if os.path.isfile(file_path):
+                    ext = file_path.rsplit(".", 1)[-1].lower()
+                    if ext in self.filter_:
+                        file_paths.append(os.path.join(file_path))
+                elif os.path.isdir(file_path):
+                    directory = file_path
+                    for file in os.listdir(directory):
+                        file_path = os.path.join(directory, file)
+                        if os.path.isfile(file_path):
+                            ext = file_path.rsplit(".", 1)[-1].lower()
+
+                            if ext in self.filter_ and ext != "m3u":
+                                file_paths.append(file_path)
+
+            for path in file_paths:
+                if path.endswith('.m3u'):
+                    self.open_playlist(path)
+                else:
+                    self.add_to_playlist(path)
+
+            if file_paths:
+                self.open_media(file_paths[0])
+
+            event.acceptProposedAction()
 
     def showEvent(self, event):
         super().showEvent(event)
@@ -947,6 +997,8 @@ class Window(QMainWindow):
             self.win_toolbar.setWindow(self.windowHandle())
 
     def closeEvent(self, event):
-        self.settings.setValue("window_size", self.size())
-        self.settings.setValue("media_volume", self.horizontalSlider_2.value())
-        event.accept()
+        event.ignore()
+        if self.settings.value("hide_window_in_tray", "false") == "true":
+            self.hide()
+        else:
+            self.exit_app()

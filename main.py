@@ -2,15 +2,14 @@
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtMultimedia import QMediaPlayer
 from PyQt5.QtCore import QSettings, Qt
+from PyQt5.QtGui import QPalette, QColor
 import os
 import sys
-import logging
-from tempfile import gettempdir
 
 from core.main_window import Window
 
 name = "DEEF Lite Media Player"
-version = "1.0"
+version = "1.1"
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 supported_formats = [
@@ -27,49 +26,42 @@ def is_media_file(file_path):
 
     return file_extension in supported_formats
 
-def read_style_sheet(file_path):
-    try:
-        with open(file_path, 'r') as file:
-            css = file.read()
-            css = css.replace(
-                "RESOURCE_PATH", 
-                current_dir.replace("\\", "/")
-            )
-            return css
-    except Exception as e:
-        logging.error(str(e))
-        return ""
+def set_app_palette():
+    app_palette = QPalette()
 
-def setup_logging():
-    logging.basicConfig(
-        level=logging.ERROR,
-        format='%(asctime)s %(levelname)s: %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S',
-        filename=os.path.join(gettempdir(), 'error.log'),
-        filemode='w'
-    )
+    if app_theme == "dark":
+        app_palette.setColor(QPalette.Window, QColor(53, 53, 53))
+        app_palette.setColor(QPalette.WindowText, Qt.white)
+        app_palette.setColor(QPalette.Base, QColor(35, 35, 35))
+        app_palette.setColor(QPalette.AlternateBase, QColor(53, 53, 53))
+        app_palette.setColor(QPalette.Text, Qt.white)
+        app_palette.setColor(QPalette.Button, QColor(53, 53, 53))
+        app_palette.setColor(QPalette.ButtonText, Qt.white)
+        app_palette.setColor(QPalette.BrightText, Qt.red)
+        app_palette.setColor(QPalette.Link, QColor(42, 130, 218))
+        app_palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
+        app_palette.setColor(QPalette.HighlightedText, Qt.white)
+        app_palette.setColor(QPalette.Active, QPalette.Button, QColor(53, 53, 53))
+        app_palette.setColor(QPalette.Disabled, QPalette.ButtonText, Qt.darkGray)
+        app_palette.setColor(QPalette.Disabled, QPalette.WindowText, Qt.darkGray)
+        app_palette.setColor(QPalette.Disabled, QPalette.Text, Qt.darkGray)
+        app_palette.setColor(QPalette.Disabled, QPalette.Light, QColor(53, 53, 53))
+        app_palette.setColor(QPalette.Disabled, QPalette.ToolTipBase, Qt.black)
+        app_palette.setColor(QPalette.Disabled, QPalette.ToolTipText, Qt.white)
+    else:
+        app_palette = QPalette()
+        app_palette.setColor(QPalette.Highlight, QColor(144,200,246))
+        app_palette.setColor(QPalette.HighlightedText, Qt.black)
 
-def handle_exception(exc_type, exc_value, exc_traceback):
-    if issubclass(exc_type, KeyboardInterrupt):
-        sys.__excepthook__(exc_type, exc_value, exc_traceback)
-        return
-    logging.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
-
-def apply_theme(app_theme, theme_style):
-    app.setStyleSheet(read_style_sheet(f"{current_dir}/core/css/{app_theme}/{theme_style}.css"))
-    if theme_style != "classic" and theme_style != "modern":
-        app.setStyle(theme_style)
+    app.setPalette(app_palette)
 
 if __name__ == '__main__':
-    setup_logging() 
-    sys.excepthook = handle_exception
-
     settings = QSettings("deeffest", name)  
-    app_theme = settings.value("app_theme", "dark")
-    theme_style = settings.value("theme_style", "classic")    
+    app_theme = settings.value("app_theme", "dark")  
     
     app = QApplication(sys.argv + (['-platform', 'windows:darkmode=1'] if app_theme == "dark" else []))
-    apply_theme(app_theme, theme_style)
+    app.setStyle("Fusion")
+    set_app_palette()
 
     multimedia_plugin = settings.value("preferred_multimedia_plugins", "directshow")
     os.environ['QT_MULTIMEDIA_PREFERRED_PLUGINS'] = f"{multimedia_plugin}"

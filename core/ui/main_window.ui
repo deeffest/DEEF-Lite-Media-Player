@@ -525,7 +525,7 @@
            </property>
            <property name="maximumSize">
             <size>
-             <width>50</width>
+             <width>16777215</width>
              <height>16777215</height>
             </size>
            </property>
@@ -723,7 +723,7 @@ color: white;</string>
    </widget>
    <widget class="QMenu" name="menuNavigate">
     <property name="title">
-     <string>Navigate</string>
+     <string>Navigation</string>
     </property>
     <addaction name="actionPrevious_2"/>
     <addaction name="actionNext_2"/>

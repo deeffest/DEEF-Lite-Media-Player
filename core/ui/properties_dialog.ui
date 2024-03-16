@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>244</height>
+    <height>242</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -61,6 +61,12 @@
      </item>
      <item>
       <widget class="QLineEdit" name="lineEdit">
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
        <property name="styleSheet">
         <string notr="true"/>
        </property>
@@ -82,8 +88,11 @@
    </item>
    <item>
     <widget class="QFrame" name="frame">
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::NoFrame</enum>
      </property>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>

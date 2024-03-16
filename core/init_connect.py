@@ -1,4 +1,3 @@
-#init_connect.py
 import sys
 import webbrowser
 
@@ -15,7 +14,7 @@ def _init_connect(self):
     self.toolButton_6.clicked.connect(self.forward_media) 
     self.actionOpen_file.triggered.connect(self.open_file_dialog)
     self.actionOpen_File_URL.triggered.connect(self.open_media_dialog)
-    self.actionExit_2.triggered.connect(lambda: sys.exit())   
+    self.actionExit_2.triggered.connect(self.exit_app)   
     self.actionFullscreen.triggered.connect(self.open_fullscreen)
     self.toolButton_9.clicked.connect(self.stop_media)
     self.actionPlay_Pause.triggered.connect(self.play_pause_media)
@@ -58,5 +57,6 @@ def _init_connect(self):
 
     self.horizontalSlider.mousePressEvent = self.on_slider_pressed
     self.horizontalSlider.mouseMoveEvent = self.on_slider_moved
+    self.horizontalSlider.enterEvent = self.on_slider_enter
     self.horizontalSlider_2.mousePressEvent = self.on_volume_slider_pressed
     self.horizontalSlider_2.mouseMoveEvent = self.on_volume_slider_moved

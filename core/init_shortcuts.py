@@ -1,4 +1,3 @@
-#init_shortcuts.py
 from PyQt5.QtWidgets import (
     QShortcut
 )

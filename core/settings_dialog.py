@@ -1,7 +1,4 @@
-#settings_dialog.py
-from PyQt5.QtWidgets import (QDialog, QDialogButtonBox,
-    QMessageBox, QApplication
-)
+from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QMessageBox, QApplication
 from PyQt5.QtCore import Qt, QProcess
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.uic import loadUi
@@ -36,7 +33,7 @@ class SettingsDlg(QDialog):
         self._init_connect()
 
     def _init_content(self):
-        self.label_2.setPixmap(QPixmap(f"{self.current_dir}/resources/icons/{self.window.icon_folder}/settings_white_24dp.svg"))
+        self.label_2.setPixmap(QPixmap(f"{self.current_dir}/resources/icons/{self.window.theme}/settings_white_24dp.svg"))
 
         if self.settings.value("memorize_last_window_size", "false") == "true":
             self.checkBox.setChecked(True)
@@ -53,26 +50,20 @@ class SettingsDlg(QDialog):
         else:
             self.comboBox_2.setCurrentIndex(1)
 
-        theme_style = self.settings.value("theme_style", "classic")
-        if theme_style == "classic":
-            self.comboBox_3.setCurrentIndex(0)
-        elif theme_style == "modern":
-            self.comboBox_3.setCurrentIndex(1)
-        elif theme_style == "windowsvista":
-            self.comboBox_3.setCurrentIndex(2)
-        elif theme_style == "windows":
-            self.comboBox_3.setCurrentIndex(3)
-        else:
-            self.comboBox_3.setCurrentIndex(4)
-
         if self.settings.value("search_for_updates_at_startup", "true") == "true":
-            self.checkBox_2.setChecked(True)
+            self.checkBox_4.setChecked(True)
         else:
-            self.checkBox_2.setChecked(False)
+            self.checkBox_4.setChecked(False)
+
+        if self.settings.value("hide_window_in_tray", "false") == "true":
+            self.checkBox_3.setChecked(True)
+        else:
+            self.checkBox_3.setChecked(False)
 
     def _init_connect(self):
-        self.buttonBox.button(QDialogButtonBox.Ok).clicked.connect(self.save_settings_and_close)
+        self.buttonBox.button(QDialogButtonBox.Save).clicked.connect(self.save_settings_and_close)
         self.buttonBox.button(QDialogButtonBox.Cancel).clicked.connect(self.cancel)
+        self.pushButton.clicked.connect(self.restart)
 
     def _init_window(self):
         self.setWindowTitle(self.name)
@@ -96,27 +87,19 @@ class SettingsDlg(QDialog):
         app_theme = "dark" if self.comboBox_2.currentIndex() == 0 else "light"
         self.settings.setValue("app_theme", app_theme)
 
-        theme_style = "classic"
-        index = self.comboBox_3.currentIndex()
-        if index == 1:
-            theme_style = "modern"
-        elif index == 2:
-            theme_style = "windowsvista"
-        elif index == 3:
-            theme_style = "windows"
-        elif index == 4:
-            theme_style = "fusion"
-        self.settings.setValue("theme_style", theme_style)
+        self.settings.setValue("search_for_updates_at_startup", str(self.checkBox_4.isChecked()).lower())
 
-        self.settings.setValue("search_for_updates_at_startup", str(self.checkBox_2.isChecked()).lower())
+        self.settings.setValue("hide_window_in_tray", str(self.checkBox_3.isChecked()).lower())
+        if self.checkBox_3.isChecked():
+            self.window.tray_icon.show()
+        else:
+            self.window.tray_icon.hide()
 
-        msg = QMessageBox.question(self,
-            "A reboot is required to apply settings",
-            "A reboot is required to apply settings, do you really want to reboot App now?"
-        )
-        if msg == QMessageBox.Yes:
-            self.settings.setValue("window_size", self.window.size())
-            self.settings.setValue("media_volume", self.window.horizontalSlider_2.value())
-            
-            QApplication.quit()
-            status = QProcess.startDetached(sys.executable, sys.argv) 
+        self.settings.setValue("window_size", self.window.size())
+        self.settings.setValue("media_volume", self.window.horizontalSlider_2.value())
+
+    def restart(self):
+        self.save_settings()
+
+        QApplication.quit()
+        status = QProcess.startDetached(sys.executable, sys.argv)

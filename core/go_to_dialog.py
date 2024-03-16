@@ -1,4 +1,3 @@
-#go_to_dialog.py
 from PyQt5.QtWidgets import (
     QDialog, QDialogButtonBox, QMessageBox
 )
@@ -41,7 +40,7 @@ class GoToDlg(QDialog):
         self.lineEdit.setText(self.current_time_fmt)
         self._setup_time_validator()
 
-        self.label_2.setPixmap(QPixmap(f"{self.current_dir}/resources/icons/{self.window.icon_folder}/schedule_white_24dp.svg"))
+        self.label_2.setPixmap(QPixmap(f"{self.current_dir}/resources/icons/{self.window.theme}/schedule_white_24dp.svg"))
 
     def _setup_time_validator(self):
         time_format_regex = QRegExp("^(\\d{1,2}:)?([0-5]?\\d):([0-5]\\d)$")

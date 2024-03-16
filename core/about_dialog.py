@@ -1,4 +1,3 @@
-#about_dialog.py
 from PyQt5.QtWidgets import (
     QDialog, QDialogButtonBox, QMessageBox
 )
