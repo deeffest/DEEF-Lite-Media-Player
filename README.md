@@ -4,10 +4,6 @@
 
 **Simple application for playing media files on your Windows PC, written in PyQt5 and its QMediaPlayer.**
 
-**Supported media file formats (list updated frequently):**
-
-- `mp3`, `wav`, `ogg`, `flac`, `aac`, `wma`, `m4a`, `opus`, `webm`, `mp4`, `avi`, `mov`, `m3u`, `3gpp`, and `mkv`.
-
 ## Screenshots:
 
 ![Screenshot_1](https://github.com/deeffest/DEEF-Lite-Media-Player/assets/117280555/89acdef6-9005-4d2a-a5f9-ce1115eb1894)
