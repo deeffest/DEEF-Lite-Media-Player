@@ -1,41 +1,54 @@
 ![icon-0](https://github.com/deeffest/DEEF-Lite-Media-Player/assets/117280555/176ed8a3-86d5-4e9d-8663-12050e924032)
 
-# DEEF-Lite-Media-Player
+## DEEF Lite Media Player
 
-A simple App for playing media files on your Windows PC, written in [PyQt5](https://www.riverbankcomputing.com/software/pyqt/intro) and its QMediaPlayer.
+**Simple application for playing media files on your Windows PC, written in PyQt5 and its QMediaPlayer.**
 
-Supported media formats (the list is frequently updated): \
- `mp3`, `wav`, `ogg`, `flac`, `aac`, `wma`, `m4a`, `opus`, `webm`, `mp4`, `avi`, `mov`, `m3u`, `3gpp`, and `mkv`
+**Supported media file formats (list updated frequently):**
 
-## Screenshots
+- `mp3`, `wav`, `ogg`, `flac`, `aac`, `wma`, `m4a`, `opus`, `webm`, `mp4`, `avi`, `mov`, `m3u`, `3gpp`, and `mkv`.
+
+## Screenshots:
 
 ![Screenshot_1](https://github.com/deeffest/DEEF-Lite-Media-Player/assets/117280555/89acdef6-9005-4d2a-a5f9-ce1115eb1894)
 
-## Start using
+## Getting Started:
 
-1. Download and install [LAV Filters](https://github.com/Nevcairiel/LAVFilters/releases/download/0.78/LAVFilters-0.78-Installer.exe) 
-2. Download and install `DLMPlayer-Setup.exe` from the releases page: https://github.com/deeffest/DEEF-Lite-Media-Player/releases
+1. **Download and install LAV Filters:** https://github.com/Nevcairiel/LAVFilters/releases/download/0.78/LAVFilters-0.78-Installer.exe
 
->To use DLMPlayer without LAV Filters, you need to set Windows Media Foundation as "Preferred multimedia plugin" in the "Player" settings, instead of the default DirectShow.
+2. **Download and install DLMPlayer-Setup.exe:** https://github.com/deeffest/DEEF-Lite-Media-Player/releases
 
-## Use DLMPlayer as default media player in Windows
+> **To use DLMPlayer without LAV Filters:**
+> - You need to set Windows Media Foundation as "Preferred Multimedia Plugin" in the "Player" settings instead of the default DirectShow.
 
-1. Locate the DLMPlayer.exe program on your computer. Make sure you know the exact file path (C:\Program Files\DEEF Lite Media Player\DLMPlayer.exe).
+## Functionality:
 
-2. Right-click on an media file (e.g., MP4, MP3) that you want to open with DLMPlayer.exe.
+- **Lightweight and easy to use:** DEEF Lite Media Player does not overload your system and provides smooth playback.
 
-3. From the context menu, select "Open with" and then click on "Choose another app."
+- **Support for a wide range of formats:** DEEF Lite Media Player supports a variety of audio and video formats, allowing you to enjoy virtually any media file.
 
-4. A window will appear with a list of available apps. If DLMPlayer.exe is listed, select it. If it's not listed, click on the option "More apps" at the bottom of the list.
+- **Intuitive interface:** DEEF Lite Media Player has a simple and straightforward interface that is easy to learn.
 
-5. In the "Choose an app" window, scroll down and click on the link "Look for another app on this PC."
+- **Customizable:** DEEF Lite Media Player allows you to customize various playback settings so you can personalize your experience.
 
-6. Navigate to the file path where DLMPlayer.exe is located. Select DLMPlayer.exe and click "Open."
+**DEEF Lite Media Player is a great choice for anyone looking for a simple and reliable way to play media files on their Windows PC.**
 
-7. Windows will now open the selected image file with DLMPlayer.exe. Additionally, DLMPlayer.exe will be added to the list of available apps for opening image files by default.
+## References:
 
-8. Repeat steps 2-7 for other media file types if you want DLMPlayer.exe to be the default viewer for those file types as well.
+- **Qt:** https://www.qt.io/
 
----
+- **PyQt:** https://riverbankcomputing.com/software/pyqt
 
-Now, whenever you double-click on an media file, Windows will open it using DLMPlayer.exe by default!
+- **Bug Reports:** https://github.com/deeffest/DEEF-Lite-Media-Player/issues/new/choose
+
+## See Also:
+
+- **DEEF Lite Image Viewer:** https://github.com/deeffest/DEEF-Lite-Image-Viewer
+- **Youtube Music Desktop Player:** https://github.com/deeffest/Youtube-Music-Desktop-Player
+
+## License:
+
+DEEF Lite Media Player is distributed under the GPLv3 license.
+
+**Please let us know if you have any questions or suggestions.**
+
