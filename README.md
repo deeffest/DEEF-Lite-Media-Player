@@ -10,7 +10,7 @@
 
 ## Getting Started:
 
-1. **Download and install LAV Filters:** https://github.com/Nevcairiel/LAVFilters/releases/download/0.78/LAVFilters-0.78-Installer.exe
+1. **Download and install LAV Filters:** https://github.com/Nevcairiel/LAVFilters/releases/download/0.79.2/LAVFilters-0.79.2-Installer.exe
 
 2. **Download and install DLMPlayer-Setup.exe:** https://github.com/deeffest/DEEF-Lite-Media-Player/releases
 
