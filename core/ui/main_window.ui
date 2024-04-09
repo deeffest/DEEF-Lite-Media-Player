@@ -187,8 +187,8 @@
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>C:/Users/resources/icons/dark_icons/replay_10_white_24dp.svg</normaloff>
-             <disabledoff>C:/Users/resources/icons/disabled_icons/replay_10_white_24dp.svg</disabledoff>C:/Users/resources/icons/dark_icons/replay_10_white_24dp.svg</iconset>
+             <normaloff>../../../../resources/icons/dark_icons/replay_10_white_24dp.svg</normaloff>
+             <disabledoff>../../../../resources/icons/disabled_icons/replay_10_white_24dp.svg</disabledoff>../../../../resources/icons/dark_icons/replay_10_white_24dp.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -226,8 +226,8 @@
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>C:/Users/resources/icons/dark_icons/skip_previous_white_24dp.svg</normaloff>
-             <disabledoff>C:/Users/resources/icons/disabled_icons/skip_previous_white_24dp.svg</disabledoff>C:/Users/resources/icons/dark_icons/skip_previous_white_24dp.svg</iconset>
+             <normaloff>../../../../resources/icons/dark_icons/skip_previous_white_24dp.svg</normaloff>
+             <disabledoff>../../../../resources/icons/disabled_icons/skip_previous_white_24dp.svg</disabledoff>../../../../resources/icons/dark_icons/skip_previous_white_24dp.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -265,10 +265,10 @@
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>C:/Users/resources/icons/dark_icons/pause_white_24dp.svg</normaloff>
-             <normalon>C:/Users/resources/icons/dark_icons/play_arrow_white_24dp.svg</normalon>
-             <disabledoff>C:/Users/resources/icons/disabled_icons/pause_white_24dp.svg</disabledoff>
-             <disabledon>C:/Users/resources/icons/disabled_icons/play_arrow_white_24dp.svg</disabledon>C:/Users/resources/icons/dark_icons/pause_white_24dp.svg</iconset>
+             <normaloff>../../../../resources/icons/dark_icons/pause_white_24dp.svg</normaloff>
+             <normalon>../../../../resources/icons/dark_icons/play_arrow_white_24dp.svg</normalon>
+             <disabledoff>../../../../resources/icons/disabled_icons/pause_white_24dp.svg</disabledoff>
+             <disabledon>../../../../resources/icons/disabled_icons/play_arrow_white_24dp.svg</disabledon>../../../../resources/icons/dark_icons/pause_white_24dp.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -312,8 +312,8 @@
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>C:/Users/resources/icons/dark_icons/skip_next_white_24dp.svg</normaloff>
-             <disabledoff>C:/Users/resources/icons/disabled_icons/skip_next_white_24dp.svg</disabledoff>C:/Users/resources/icons/dark_icons/skip_next_white_24dp.svg</iconset>
+             <normaloff>../../../../resources/icons/dark_icons/skip_next_white_24dp.svg</normaloff>
+             <disabledoff>../../../../resources/icons/disabled_icons/skip_next_white_24dp.svg</disabledoff>../../../../resources/icons/dark_icons/skip_next_white_24dp.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -351,8 +351,8 @@
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>C:/Users/resources/icons/dark_icons/forward_10_white_24dp.svg</normaloff>
-             <disabledoff>C:/Users/resources/icons/disabled_icons/forward_10_white_24dp.svg</disabledoff>C:/Users/resources/icons/dark_icons/forward_10_white_24dp.svg</iconset>
+             <normaloff>../../../../resources/icons/dark_icons/forward_10_white_24dp.svg</normaloff>
+             <disabledoff>../../../../resources/icons/disabled_icons/forward_10_white_24dp.svg</disabledoff>../../../../resources/icons/dark_icons/forward_10_white_24dp.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -424,8 +424,8 @@
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>C:/Users/resources/icons/dark_icons/stop_white_24dp.svg</normaloff>
-             <disabledoff>C:/Users/resources/icons/disabled_icons/stop_white_24dp.svg</disabledoff>C:/Users/resources/icons/dark_icons/stop_white_24dp.svg</iconset>
+             <normaloff>../../../../resources/icons/dark_icons/stop_white_24dp.svg</normaloff>
+             <disabledoff>../../../../resources/icons/disabled_icons/stop_white_24dp.svg</disabledoff>../../../../resources/icons/dark_icons/stop_white_24dp.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -466,11 +466,11 @@
             <enum>Qt::Horizontal</enum>
            </property>
            <property name="sizeType">
-            <enum>QSizePolicy::Expanding</enum>
+            <enum>QSizePolicy::MinimumExpanding</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
-             <width>10</width>
+             <width>30</width>
              <height>20</height>
             </size>
            </property>
@@ -501,8 +501,8 @@
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>C:/Users/resources/icons/dark_icons/volume_up_white_24dp.svg</normaloff>
-             <normalon>C:/Users/resources/icons/dark_icons/volume_off_white_24dp.svg</normalon>C:/Users/resources/icons/dark_icons/volume_up_white_24dp.svg</iconset>
+             <normaloff>../../../../resources/icons/dark_icons/volume_up_white_24dp.svg</normaloff>
+             <normalon>../../../../resources/icons/dark_icons/volume_off_white_24dp.svg</normalon>../../../../resources/icons/dark_icons/volume_up_white_24dp.svg</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -531,6 +531,9 @@
            </property>
            <property name="cursor">
             <cursorShape>PointingHandCursor</cursorShape>
+           </property>
+           <property name="toolTip">
+            <string>Volume</string>
            </property>
            <property name="styleSheet">
             <string notr="true"/>
@@ -562,19 +565,19 @@ color: white;</string>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_4">
        <property name="spacing">
-        <number>3</number>
+        <number>0</number>
        </property>
        <property name="leftMargin">
-        <number>6</number>
+        <number>3</number>
        </property>
        <property name="topMargin">
-        <number>4</number>
+        <number>2</number>
        </property>
        <property name="rightMargin">
-        <number>6</number>
+        <number>3</number>
        </property>
        <property name="bottomMargin">
-        <number>4</number>
+        <number>3</number>
        </property>
        <item>
         <widget class="QLabel" name="label">
@@ -628,7 +631,7 @@ color: white;</string>
      <x>0</x>
      <y>0</y>
      <width>531</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="mouseTracking">
@@ -658,7 +661,7 @@ color: white;</string>
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>C:/Users/resources/icons/dark_icons/computer_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/computer_white_24dp.svg</iconset>
+       <normaloff>../../../../resources/icons/dark_icons/computer_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/computer_white_24dp.svg</iconset>
      </property>
      <addaction name="actionFrameless"/>
      <addaction name="actionMovable"/>
@@ -670,7 +673,7 @@ color: white;</string>
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>C:/Users/resources/icons/dark_icons/list_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/list_white_24dp.svg</iconset>
+       <normaloff>../../../../resources/icons/dark_icons/list_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/list_white_24dp.svg</iconset>
      </property>
      <addaction name="actionPreset1"/>
      <addaction name="actionPreset2"/>
@@ -693,7 +696,7 @@ color: white;</string>
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>C:/Users/resources/icons/dark_icons/speed_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/speed_white_24dp.svg</iconset>
+       <normaloff>../../../../resources/icons/dark_icons/speed_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/speed_white_24dp.svg</iconset>
      </property>
      <addaction name="actionUp_3"/>
      <addaction name="actionDown_3"/>
@@ -706,7 +709,7 @@ color: white;</string>
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>C:/Users/resources/icons/dark_icons/equalizer_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/equalizer_white_24dp.svg</iconset>
+       <normaloff>../../../../resources/icons/dark_icons/equalizer_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/equalizer_white_24dp.svg</iconset>
      </property>
      <addaction name="actionUp_2"/>
      <addaction name="actionDown_2"/>
@@ -753,7 +756,7 @@ color: white;</string>
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>C:/Users/resources/icons/dark_icons/settings_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/settings_white_24dp.svg</iconset>
+       <normaloff>../../../../resources/icons/dark_icons/settings_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/settings_white_24dp.svg</iconset>
      </property>
      <addaction name="actionSave_As"/>
      <addaction name="separator"/>
@@ -774,7 +777,7 @@ color: white;</string>
   <action name="actionOpen_file">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/file_open_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/file_open_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/file_open_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/file_open_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Quickly Open File...</string>
@@ -789,7 +792,7 @@ color: white;</string>
   <action name="actionOpen_File_URL">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/link_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/link_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/link_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/link_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Open File/URL...</string>
@@ -804,7 +807,7 @@ color: white;</string>
   <action name="actionExit_2">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/exit_to_app_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/exit_to_app_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/exit_to_app_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/exit_to_app_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Exit</string>
@@ -819,7 +822,7 @@ color: white;</string>
   <action name="actionSettings">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/settings_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/settings_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/settings_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/settings_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Settings...</string>
@@ -870,7 +873,7 @@ color: white;</string>
   <action name="actionUp">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/arrow_drop_up_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/arrow_drop_up_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/arrow_drop_up_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/arrow_drop_up_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Up</string>
@@ -882,7 +885,7 @@ color: white;</string>
   <action name="actionDown">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/arrow_drop_down_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/arrow_drop_down_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/arrow_drop_down_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/arrow_drop_down_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Down</string>
@@ -897,8 +900,8 @@ color: white;</string>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/volume_up_white_24dp.svg</normaloff>
-     <normalon>C:/Users/resources/icons/dark_icons/volume_off_white_24dp.svg</normalon>C:/Users/resources/icons/dark_icons/volume_up_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/volume_up_white_24dp.svg</normaloff>
+     <normalon>../../../../resources/icons/dark_icons/volume_off_white_24dp.svg</normalon>../../../../resources/icons/dark_icons/volume_up_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Mute/Unmute</string>
@@ -923,8 +926,8 @@ color: white;</string>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/skip_previous_white_24dp.svg</normaloff>
-     <disabledoff>C:/Users/resources/icons/disabled_icons/skip_previous_white_24dp.svg</disabledoff>C:/Users/resources/icons/dark_icons/skip_previous_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/skip_previous_white_24dp.svg</normaloff>
+     <disabledoff>../../../../resources/icons/disabled_icons/skip_previous_white_24dp.svg</disabledoff>../../../../resources/icons/dark_icons/skip_previous_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Previous</string>
@@ -942,8 +945,8 @@ color: white;</string>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/skip_next_white_24dp.svg</normaloff>
-     <disabledoff>C:/Users/resources/icons/disabled_icons/skip_next_white_24dp.svg</disabledoff>C:/Users/resources/icons/dark_icons/skip_next_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/skip_next_white_24dp.svg</normaloff>
+     <disabledoff>../../../../resources/icons/disabled_icons/skip_next_white_24dp.svg</disabledoff>../../../../resources/icons/dark_icons/skip_next_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Next</string>
@@ -961,8 +964,8 @@ color: white;</string>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/schedule_white_24dp.svg</normaloff>
-     <disabledoff>C:/Users/resources/icons/disabled_icons/schedule_white_24dp.svg</disabledoff>C:/Users/resources/icons/dark_icons/schedule_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/schedule_white_24dp.svg</normaloff>
+     <disabledoff>../../../../resources/icons/disabled_icons/schedule_white_24dp.svg</disabledoff>../../../../resources/icons/dark_icons/schedule_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Go To...</string>
@@ -977,7 +980,7 @@ color: white;</string>
   <action name="actionAdd_bookmark">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/add_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/add_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/add_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/add_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Add...</string>
@@ -989,7 +992,7 @@ color: white;</string>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/edit_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/edit_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/edit_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/edit_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Organize...</string>
@@ -998,7 +1001,7 @@ color: white;</string>
   <action name="actionCheck_for_updates">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/update_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/update_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/update_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/update_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Check for Updates</string>
@@ -1007,7 +1010,7 @@ color: white;</string>
   <action name="actionAbout">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/help_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/help_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/help_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/help_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>About...</string>
@@ -1016,7 +1019,7 @@ color: white;</string>
   <action name="actionDonate">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/favorite_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/favorite_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/favorite_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/favorite_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Donate</string>
@@ -1028,7 +1031,7 @@ color: white;</string>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/playlist_add_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/playlist_add_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/playlist_add_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/playlist_add_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Add File to Playlist...</string>
@@ -1046,8 +1049,8 @@ color: white;</string>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/picture_in_picture_white_24dp.svg</normaloff>
-     <normalon>C:/Users/resources/icons/dark_icons/picture_in_picture_alt_white_24dp.svg</normalon>C:/Users/resources/icons/dark_icons/picture_in_picture_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/picture_in_picture_white_24dp.svg</normaloff>
+     <normalon>../../../../resources/icons/dark_icons/picture_in_picture_alt_white_24dp.svg</normalon>../../../../resources/icons/dark_icons/picture_in_picture_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Mini Player</string>
@@ -1065,8 +1068,8 @@ color: white;</string>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/fullscreen_white_24dp.svg</normaloff>
-     <normalon>C:/Users/resources/icons/dark_icons/close_fullscreen_white_24dp.svg</normalon>C:/Users/resources/icons/dark_icons/fullscreen_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/fullscreen_white_24dp.svg</normaloff>
+     <normalon>../../../../resources/icons/dark_icons/close_fullscreen_white_24dp.svg</normalon>../../../../resources/icons/dark_icons/fullscreen_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Full Screen</string>
@@ -1157,7 +1160,7 @@ color: white;</string>
   <action name="actionBookmarks">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/bookmarks_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/bookmarks_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/bookmarks_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/bookmarks_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Bookmarks</string>
@@ -1172,7 +1175,7 @@ color: white;</string>
   <action name="actionOpen_Folder">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/folder_open_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/folder_open_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/folder_open_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/folder_open_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Open Folder...</string>
@@ -1187,7 +1190,7 @@ color: white;</string>
   <action name="actionReport">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/bug_report_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/bug_report_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/bug_report_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/bug_report_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Bug Report</string>
@@ -1232,7 +1235,7 @@ color: white;</string>
   <action name="actionCustom">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/tune_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/tune_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/tune_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/tune_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Custom...</string>
@@ -1393,8 +1396,8 @@ color: white;</string>
   <action name="actionUp_2">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/keyboard_arrow_up_white_24dp.svg</normaloff>
-     <disabledoff>C:/Users/resources/icons/disabled_icons/keyboard_arrow_up_white_24dp.svg</disabledoff>C:/Users/resources/icons/dark_icons/keyboard_arrow_up_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/keyboard_arrow_up_white_24dp.svg</normaloff>
+     <disabledoff>../../../../resources/icons/disabled_icons/keyboard_arrow_up_white_24dp.svg</disabledoff>../../../../resources/icons/dark_icons/keyboard_arrow_up_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Up</string>
@@ -1409,8 +1412,8 @@ color: white;</string>
   <action name="actionDown_2">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/keyboard_arrow_down_white_24dp.svg</normaloff>
-     <disabledoff>C:/Users/resources/icons/disabled_icons/keyboard_arrow_down_white_24dp.svg</disabledoff>C:/Users/resources/icons/dark_icons/keyboard_arrow_down_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/keyboard_arrow_down_white_24dp.svg</normaloff>
+     <disabledoff>../../../../resources/icons/disabled_icons/keyboard_arrow_down_white_24dp.svg</disabledoff>../../../../resources/icons/dark_icons/keyboard_arrow_down_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Down</string>
@@ -1428,8 +1431,8 @@ color: white;</string>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</normaloff>
-     <normalon>C:/Users/resources/icons/dark_icons/check_box_white_24dp.svg</normalon>C:/Users/resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</normaloff>
+     <normalon>../../../../resources/icons/dark_icons/check_box_white_24dp.svg</normalon>../../../../resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Frameless Window</string>
@@ -1479,8 +1482,8 @@ color: white;</string>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</normaloff>
-     <normalon>C:/Users/resources/icons/dark_icons/check_box_white_24dp.svg</normalon>C:/Users/resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</normaloff>
+     <normalon>../../../../resources/icons/dark_icons/check_box_white_24dp.svg</normalon>../../../../resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Movable Window</string>
@@ -1495,7 +1498,7 @@ color: white;</string>
   <action name="actionAdd_to_playlist">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/playlist_add_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/playlist_add_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/playlist_add_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/playlist_add_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Add to Playlist...</string>
@@ -1504,7 +1507,7 @@ color: white;</string>
   <action name="actionAdd_to_Bookmarks">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/bookmark_add_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/bookmark_add_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/bookmark_add_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/bookmark_add_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Add to Bookmarks...</string>
@@ -1526,7 +1529,7 @@ color: white;</string>
   <action name="actionOpen_Subtitles">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/file_open_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/file_open_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/file_open_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/file_open_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Open Subtitles...</string>
@@ -1535,7 +1538,7 @@ color: white;</string>
   <action name="actionHide_Subtitles">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/subtitles_off_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/subtitles_off_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/subtitles_off_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/subtitles_off_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Hide Subtitles</string>
@@ -1547,8 +1550,8 @@ color: white;</string>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/playlist_add_white_24dp.svg</normaloff>
-     <disabledoff>C:/Users/resources/icons/disabled_icons/playlist_add_white_24dp.svg</disabledoff>C:/Users/resources/icons/dark_icons/playlist_add_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/playlist_add_white_24dp.svg</normaloff>
+     <disabledoff>../../../../resources/icons/disabled_icons/playlist_add_white_24dp.svg</disabledoff>../../../../resources/icons/dark_icons/playlist_add_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Playlist</string>
@@ -1566,8 +1569,8 @@ color: white;</string>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/bookmark_add_white_24dp.svg</normaloff>
-     <disabledoff>C:/Users/resources/icons/disabled_icons/bookmark_add_white_24dp.svg</disabledoff>C:/Users/resources/icons/dark_icons/bookmark_add_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/bookmark_add_white_24dp.svg</normaloff>
+     <disabledoff>../../../../resources/icons/disabled_icons/bookmark_add_white_24dp.svg</disabledoff>../../../../resources/icons/dark_icons/bookmark_add_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Bookmarks</string>
@@ -1621,8 +1624,8 @@ color: white;</string>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</normaloff>
-     <normalon>C:/Users/resources/icons/dark_icons/check_box_white_24dp.svg</normalon>C:/Users/resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</normaloff>
+     <normalon>../../../../resources/icons/dark_icons/check_box_white_24dp.svg</normalon>../../../../resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>On Top Window</string>
@@ -1640,8 +1643,8 @@ color: white;</string>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/info_white_24dp.svg</normaloff>
-     <disabledoff>C:/Users/resources/icons/disabled_icons/info_white_24dp.svg</disabledoff>C:/Users/resources/icons/dark_icons/info_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/info_white_24dp.svg</normaloff>
+     <disabledoff>../../../../resources/icons/disabled_icons/info_white_24dp.svg</disabledoff>../../../../resources/icons/dark_icons/info_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Properties</string>
@@ -1659,8 +1662,8 @@ color: white;</string>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/playlist_add_white_24dp.svg</normaloff>
-     <disabledoff>C:/Users/resources/icons/disabled_icons/playlist_add_white_24dp.svg</disabledoff>C:/Users/resources/icons/dark_icons/playlist_add_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/playlist_add_white_24dp.svg</normaloff>
+     <disabledoff>../../../../resources/icons/disabled_icons/playlist_add_white_24dp.svg</disabledoff>../../../../resources/icons/dark_icons/playlist_add_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Playlist</string>
@@ -1678,8 +1681,8 @@ color: white;</string>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/bookmark_add_white_24dp.svg</normaloff>
-     <disabledoff>C:/Users/resources/icons/disabled_icons/bookmark_add_white_24dp.svg</disabledoff>C:/Users/resources/icons/dark_icons/bookmark_add_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/bookmark_add_white_24dp.svg</normaloff>
+     <disabledoff>../../../../resources/icons/disabled_icons/bookmark_add_white_24dp.svg</disabledoff>../../../../resources/icons/dark_icons/bookmark_add_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Bookmarks</string>
@@ -1702,8 +1705,8 @@ color: white;</string>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</normaloff>
-     <normalon>C:/Users/resources/icons/dark_icons/check_box_white_24dp.svg</normalon>C:/Users/resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</normaloff>
+     <normalon>../../../../resources/icons/dark_icons/check_box_white_24dp.svg</normalon>../../../../resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Hide Menubar</string>
@@ -1721,8 +1724,8 @@ color: white;</string>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</normaloff>
-     <normalon>C:/Users/resources/icons/dark_icons/check_box_white_24dp.svg</normalon>C:/Users/resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</normaloff>
+     <normalon>../../../../resources/icons/dark_icons/check_box_white_24dp.svg</normalon>../../../../resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Hide Seekbar</string>
@@ -1743,8 +1746,8 @@ color: white;</string>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</normaloff>
-     <normalon>C:/Users/resources/icons/dark_icons/check_box_white_24dp.svg</normalon>C:/Users/resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</normaloff>
+     <normalon>../../../../resources/icons/dark_icons/check_box_white_24dp.svg</normalon>../../../../resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Hide Playbar</string>
@@ -1762,8 +1765,8 @@ color: white;</string>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/cancel_white_24dp.svg</normaloff>
-     <disabledoff>C:/Users/resources/icons/disabled_icons/cancel_white_24dp.svg</disabledoff>C:/Users/resources/icons/dark_icons/cancel_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/cancel_white_24dp.svg</normaloff>
+     <disabledoff>../../../../resources/icons/disabled_icons/cancel_white_24dp.svg</disabledoff>../../../../resources/icons/dark_icons/cancel_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Close</string>
@@ -1781,8 +1784,8 @@ color: white;</string>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/save_white_24dp.svg</normaloff>
-     <disabledoff>C:/Users/resources/icons/disabled_icons/save_white_24dp.svg</disabledoff>C:/Users/resources/icons/dark_icons/save_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/save_white_24dp.svg</normaloff>
+     <disabledoff>../../../../resources/icons/disabled_icons/save_white_24dp.svg</disabledoff>../../../../resources/icons/dark_icons/save_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Save modified Playlist</string>
@@ -1791,7 +1794,7 @@ color: white;</string>
   <action name="actionOpen_Playtlist">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/playlist_play_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/playlist_play_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/playlist_play_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/playlist_play_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Open Playlist...</string>
@@ -1827,7 +1830,7 @@ color: white;</string>
   <action name="actionCreate_Playlist_2">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/edit_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/edit_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/edit_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/edit_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Create Playlist...</string>
@@ -1850,8 +1853,8 @@ color: white;</string>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/save_white_24dp.svg</normaloff>
-     <disabledoff>C:/Users/resources/icons/disabled_icons/save_white_24dp.svg</disabledoff>C:/Users/resources/icons/dark_icons/save_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/save_white_24dp.svg</normaloff>
+     <disabledoff>../../../../resources/icons/disabled_icons/save_white_24dp.svg</disabledoff>../../../../resources/icons/dark_icons/save_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Save As...</string>
@@ -1871,8 +1874,8 @@ color: white;</string>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/close_white_24dp.svg</normaloff>
-     <disabledoff>C:/Users/resources/icons/disabled_icons/close_white_24dp.svg</disabledoff>C:/Users/resources/icons/dark_icons/close_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/close_white_24dp.svg</normaloff>
+     <disabledoff>../../../../resources/icons/disabled_icons/close_white_24dp.svg</disabledoff>../../../../resources/icons/dark_icons/close_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Clear </string>
@@ -1890,8 +1893,8 @@ color: white;</string>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/shuffle_white_24dp.svg</normaloff>
-     <disabledoff>C:/Users/resources/icons/disabled_icons/shuffle_white_24dp.svg</disabledoff>C:/Users/resources/icons/dark_icons/shuffle_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/shuffle_white_24dp.svg</normaloff>
+     <disabledoff>../../../../resources/icons/disabled_icons/shuffle_white_24dp.svg</disabledoff>../../../../resources/icons/dark_icons/shuffle_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Shuffle</string>
@@ -1908,7 +1911,7 @@ color: white;</string>
   <action name="actionSubtitles">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/subtitles_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/subtitles_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/subtitles_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/subtitles_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Subtitles</string>
@@ -1920,8 +1923,8 @@ color: white;</string>
    </property>
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</normaloff>
-     <normalon>C:/Users/resources/icons/dark_icons/check_box_white_24dp.svg</normalon>C:/Users/resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</normaloff>
+     <normalon>../../../../resources/icons/dark_icons/check_box_white_24dp.svg</normalon>../../../../resources/icons/dark_icons/check_box_outline_blank_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Hide Statusbar</string>
@@ -1936,7 +1939,7 @@ color: white;</string>
   <action name="actionAudio_track">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/audiotrack_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/audiotrack_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/audiotrack_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/audiotrack_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Audio track</string>
@@ -1945,7 +1948,7 @@ color: white;</string>
   <action name="actionVideo_track">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/movie_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/movie_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/movie_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/movie_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Video track</string>
@@ -1954,7 +1957,7 @@ color: white;</string>
   <action name="actionSubtitle_track">
    <property name="icon">
     <iconset>
-     <normaloff>C:/Users/resources/icons/dark_icons/subtitles_white_24dp.svg</normaloff>C:/Users/resources/icons/dark_icons/subtitles_white_24dp.svg</iconset>
+     <normaloff>../../../../resources/icons/dark_icons/subtitles_white_24dp.svg</normaloff>../../../../resources/icons/dark_icons/subtitles_white_24dp.svg</iconset>
    </property>
    <property name="text">
     <string>Subtitle track</string>

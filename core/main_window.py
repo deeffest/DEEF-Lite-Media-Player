@@ -2,6 +2,7 @@ import os, sys
 import webbrowser
 import random 
 import requests
+import mimetypes
 
 from PyQt5.QtWidgets import (
     qApp, QMainWindow, QFileDialog, QMessageBox,
@@ -28,6 +29,7 @@ from core.init_connect import _init_connect
 from core.init_shortcuts import _init_shortcuts
 from core.init_config import _init_config
 from core.init_icons import _init_icons
+from core.init_styles import _init_styles
 from core.tray_icon import TrayIcon
 
 class Window(QMainWindow):
@@ -36,7 +38,6 @@ class Window(QMainWindow):
         name,
         version,
         current_dir,
-        filter_,
         settings,
         file_path=None,
         parent=None
@@ -49,7 +50,6 @@ class Window(QMainWindow):
         self.name = name
         self.version = version
         self.current_dir = current_dir
-        self.filter_ = filter_
         self.file_path = file_path
         self.settings = settings
 
@@ -90,8 +90,11 @@ class Window(QMainWindow):
 
         self.theme = self.settings.value("app_theme", "dark")
         _init_icons(self, theme=self.theme)
+        _init_styles(self)
 
     def open_media(self, file_path):
+        if not self.is_media_file(file_path):
+            return
         self.file_path = file_path
         self.setWindowTitle(f"{self.file_path} - {self.name}")
         self.tray_icon.setToolTip(self.file_path)
@@ -102,6 +105,13 @@ class Window(QMainWindow):
             self.open_playlist(file_path)
         else:
             self.set_media()
+
+    def is_media_file(self, file_path):
+        mime_type, _ = mimetypes.guess_type(file_path)
+        if mime_type is not None:
+            return mime_type.startswith('video/') or mime_type.startswith('audio/')
+        else:
+            return False
 
     def open_playlist(self, playlist_path):   
         try:
@@ -182,9 +192,9 @@ class Window(QMainWindow):
 
     def change_media_volume(self, value=None, player=None):
         if player:
-            self.player.setVolume(value)
+            self.player.setVolume(int(value))
         if value:
-            self.horizontalSlider_2.setValue(value)
+            self.horizontalSlider_2.setValue(int(value))
             self.media_volume = value
             
         if self.media_volume <= 0:
@@ -320,48 +330,56 @@ class Window(QMainWindow):
             self.name,
             self.settings, 
             self.file_path, 
-            self.filter_,
             parent=self
             )
         Dlg.exec_()
 
-    def handle_on_top_window(self):
-        if self.windowFlags() & Qt.WindowStaysOnTopHint:
+    def handle_on_top_window(self, checked=None):
+        if checked:
+            self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
+            self.settings.setValue("on_top_window", "true")
+        elif checked == False:
             self.setWindowFlag(Qt.WindowStaysOnTopHint, False)
-            self.settings.setValue("on_top_window", False) 
-        else:
-            self.setWindowFlag(Qt.WindowStaysOnTopHint)
-            self.settings.setValue("on_top_window", True) 
+            self.settings.setValue("on_top_window", "false")
+        elif checked is None:
+            if self.actionOn_Top.isChecked():
+                self.setWindowFlag(Qt.WindowStaysOnTopHint, False)
+                self.settings.setValue("on_top_window", "true")
+                self.actionOn_Top.setChecked(False) 
+            else:
+                self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
+                self.settings.setValue("on_top_window", "true")
+                self.actionOn_Top.setChecked(True)
         self.show()
 
     def handle_movable_window(self, checked=None):
         if checked:
-            self.settings.setValue("movable_window", True) 
+            self.settings.setValue("movable_window", "true") 
         elif checked == False:
-            self.settings.setValue("movable_window", False) 
+            self.settings.setValue("movable_window", "false") 
         elif checked is None:
             if self.actionMovable.isChecked():
-                self.settings.setValue("movable_window", False)
+                self.settings.setValue("movable_window", "false")
                 self.actionMovable.setChecked(False) 
             else:
-                self.settings.setValue("movable_window", True) 
+                self.settings.setValue("movable_window", "true") 
                 self.actionMovable.setChecked(True) 
 
     def handle_frameless_window(self, checked=None):
         if checked:
-            self.setWindowFlags(Qt.FramelessWindowHint)
-            self.settings.setValue("frameless_window", True) 
+            self.setWindowFlag(Qt.FramelessWindowHint, True)
+            self.settings.setValue("frameless_window", "true")
         elif checked == False:
-            self.setWindowFlags(Qt.Window)
-            self.settings.setValue("frameless_window", False)  
+            self.setWindowFlag(Qt.FramelessWindowHint, False)
+            self.settings.setValue("frameless_window", "false")
         elif checked is None:
             if self.actionFrameless.isChecked():
-                self.setWindowFlags(Qt.Window)
-                self.settings.setValue("frameless_window", False) 
-                self.actionFrameless.setChecked(False) 
-            else:                
-                self.setWindowFlags(Qt.FramelessWindowHint)
-                self.settings.setValue("frameless_window", True)
+                self.setWindowFlag(Qt.FramelessWindowHint, False)
+                self.settings.setValue("frameless_window", "false")
+                self.actionFrameless.setChecked(False)
+            else:
+                self.setWindowFlag(Qt.FramelessWindowHint, True)
+                self.settings.setValue("frameless_window", "true")
                 self.actionFrameless.setChecked(True)
         self.show()
 
@@ -370,13 +388,13 @@ class Window(QMainWindow):
             self.showNormal()
             self.actionFullscreen.setChecked(False)
 
-            if self.settings.value("preset_1", False) == "false":
+            if self.settings.value("preset_1", "false") == "false":
                 self.menubar.show()
-            if self.settings.value("preset_2", False) == "false":
+            if self.settings.value("preset_2", "false") == "false":
                 self.frame_3.show()
-            if self.settings.value("preset_3", False) == "false":
+            if self.settings.value("preset_3", "false") == "false":
                 self.frame.show()
-            if self.settings.value("preset_4", False) == "false":
+            if self.settings.value("preset_4", "false") == "false":
                 self.frame_2.show()
         else:
             self.showFullScreen()
@@ -558,7 +576,7 @@ class Window(QMainWindow):
             self,
             "Open Media File",
             "",
-            f"Media Files ({self.filter_});;All Files (*)",
+            f"All Files (*)",
             options=options
         )
         if file_name:
@@ -581,10 +599,9 @@ class Window(QMainWindow):
 
             for file in os.listdir(directory):
                 file_path = os.path.join(directory, file)
-                if os.path.isfile(file_path):
+                if os.path.isfile(file_path) and self.is_media_file(file_path):
                     ext = file_path.rsplit(".", 1)[-1].lower()
-
-                    if ext in self.filter_ and ext != "m3u":
+                    if ext != "m3u":
                         file_paths.append(file_path)
 
             if file_paths:
@@ -681,69 +698,69 @@ class Window(QMainWindow):
     def click_on_preset1(self, checked=None):
         if checked:
             self.menubar.hide()
-            self.settings.setValue("preset_1", True) 
+            self.settings.setValue("preset_1", "true") 
         elif checked == False:
             self.menubar.show()
-            self.settings.setValue("preset_1", False) 
+            self.settings.setValue("preset_1", "false") 
         elif checked is None:
             if self.actionPreset1.isChecked():
                 self.menubar.show()
-                self.settings.setValue("preset_1", False) 
+                self.settings.setValue("preset_1", "false") 
                 self.actionPreset1.setChecked(False)
             else:                
                 self.menubar.hide()
-                self.settings.setValue("preset_1", True) 
+                self.settings.setValue("preset_1", "true") 
                 self.actionPreset1.setChecked(True)
 
     def click_on_preset2(self, checked=None):
         if checked:
             self.frame_3.hide() 
-            self.settings.setValue("preset_2", True)
+            self.settings.setValue("preset_2", "true")
         elif checked == False:
             self.frame_3.show() 
-            self.settings.setValue("preset_2", False)
+            self.settings.setValue("preset_2", "false")
         elif checked is None:
             if self.actionPreset2.isChecked():
                 self.frame_3.show() 
-                self.settings.setValue("preset_2", False)
+                self.settings.setValue("preset_2", "false")
                 self.actionPreset2.setChecked(False)
             else:                
                 self.frame_3.hide() 
-                self.settings.setValue("preset_2", True)
+                self.settings.setValue("preset_2", "true")
                 self.actionPreset2.setChecked(True)
 
     def click_on_preset3(self, checked=None):
         if checked:
             self.frame.hide()
-            self.settings.setValue("preset_3", True)
+            self.settings.setValue("preset_3", "true")
         elif checked == False:
             self.frame.show() 
-            self.settings.setValue("preset_3", False)
+            self.settings.setValue("preset_3", "false")
         elif checked is None:
             if self.actionPreset3.isChecked():
                 self.frame.show() 
-                self.settings.setValue("preset_3", False)
+                self.settings.setValue("preset_3", "false")
                 self.actionPreset3.setChecked(False)
             else:                
                 self.frame.hide() 
-                self.settings.setValue("preset_3", True)
+                self.settings.setValue("preset_3", "true")
                 self.actionPreset3.setChecked(True)
 
     def click_on_preset4(self, checked=None):
         if checked:
             self.frame_2.hide()
-            self.settings.setValue("preset_4", True)
+            self.settings.setValue("preset_4", "true")
         elif checked == False:
             self.frame_2.show() 
-            self.settings.setValue("preset_4", False)
+            self.settings.setValue("preset_4", "false")
         elif checked is None:
             if self.actionPreset4.isChecked():
                 self.frame_2.show() 
-                self.settings.setValue("preset_4", False)
+                self.settings.setValue("preset_4", "false")
                 self.actionPreset4.setChecked(False)
             else:                
                 self.frame_2.hide() 
-                self.settings.setValue("preset_4", True)
+                self.settings.setValue("preset_4", "true")
                 self.actionPreset4.setChecked(True)
 
     def on_slider_enter(self, event):
@@ -764,18 +781,18 @@ class Window(QMainWindow):
         slider_val = max_val * (pos / slider_width)
         slider_val = min(max_val, max(0, slider_val))
 
-        self.horizontalSlider.setValue(slider_val)  
+        self.horizontalSlider.setValue(int(slider_val))  
         self.set_media_position(slider_val)
 
     def on_slider_pressed(self, event):
-        pos = event.pos().x() 
+        pos = event.pos().x()
         slider_width = self.horizontalSlider.width()
         max_val = min(self.horizontalSlider.maximum(), self.player.duration())
 
         slider_val = max_val * (pos / slider_width)
         slider_val = min(max_val, max(0, slider_val))
 
-        self.horizontalSlider.setValue(slider_val) 
+        self.horizontalSlider.setValue(int(slider_val))
         self.set_media_position(slider_val)
 
     def on_volume_slider_pressed(self, event):
@@ -783,9 +800,9 @@ class Window(QMainWindow):
         slider_width = self.horizontalSlider_2.width()
         max_val = self.horizontalSlider_2.maximum()
         slider_val = max_val * (pos / slider_width)
-
         slider_val = min(max_val, max(0, slider_val))
-        self.horizontalSlider_2.setValue(slider_val)
+
+        self.horizontalSlider_2.setValue(int(slider_val))
 
         self.change_media_volume(slider_val, player=True)
 
@@ -797,11 +814,11 @@ class Window(QMainWindow):
         slider_val = max_val * (pos / slider_width)
         slider_val = min(max_val, max(0, slider_val))
 
-        self.horizontalSlider_2.setValue(slider_val) 
+        self.horizontalSlider_2.setValue(int(slider_val)) 
         self.change_media_volume(slider_val, player=True)
 
     def set_media_position(self, position):
-        self.player.setPosition(position)
+        self.player.setPosition(int(position))
 
     def format_time(self, ms, show_hours=False):
         s = ms // 1000
@@ -846,7 +863,6 @@ class Window(QMainWindow):
             self.name,
             self.settings, 
             self.file_path, 
-            self.filter_,
             current_time_fmt,
             duration,
             parent=self
@@ -861,7 +877,6 @@ class Window(QMainWindow):
             self.name,
             self.settings, 
             self.file_path, 
-            self.filter_,
             parent=self
             )
         Dlg.exec_()
@@ -876,7 +891,6 @@ class Window(QMainWindow):
                 self.name,
                 self.settings, 
                 self.file_path, 
-                self.filter_,
                 video_duration_ms,
                 parent=self
                 )
@@ -890,7 +904,6 @@ class Window(QMainWindow):
             self.name,
             self.settings, 
             self.file_path, 
-            self.filter_,
             parent=self
             )
         Dlg.exec_()
@@ -923,6 +936,7 @@ class Window(QMainWindow):
 
                 if update_msg_box.clickedButton() == btn_update:
                     webbrowser.open_new_tab(item_download)
+                    self.exit_app()
             else:
                 if not startup:
                     QMessageBox.information(self, 
@@ -966,18 +980,15 @@ class Window(QMainWindow):
             file_paths = []
             for url in event.mimeData().urls():
                 file_path = url.toLocalFile()
-                if os.path.isfile(file_path):
-                    ext = file_path.rsplit(".", 1)[-1].lower()
-                    if ext in self.filter_:
-                        file_paths.append(os.path.join(file_path))
+                if os.path.isfile(file_path) and self.is_media_file(file_path):
+                    file_paths.append(os.path.join(file_path))
                 elif os.path.isdir(file_path):
                     directory = file_path
                     for file in os.listdir(directory):
                         file_path = os.path.join(directory, file)
-                        if os.path.isfile(file_path):
+                        if os.path.isfile(file_path) and self.is_media_file(file_path):
                             ext = file_path.rsplit(".", 1)[-1].lower()
-
-                            if ext in self.filter_ and ext != "m3u":
+                            if ext != "m3u":
                                 file_paths.append(file_path)
 
             for path in file_paths:

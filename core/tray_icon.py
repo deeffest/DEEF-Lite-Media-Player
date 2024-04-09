@@ -27,7 +27,7 @@ class TrayIcon(QSystemTrayIcon):
         )
         self.activated.connect(self.on_tray_icon_activated)
         
-        if self.settings.value("hide_window_in_tray", "true") == "true":
+        if self.settings.value("hide_window_in_tray", "false") == "true":
             self.show() 
         else:
             self.hide()
@@ -69,6 +69,8 @@ class TrayIcon(QSystemTrayIcon):
         menuHelp = self.window.menuHelp
         contextMenu.addMenu(menuHelp)
         contextMenu.addSeparator()
+
+        contextMenu.addAction(self.window.actionExit_2)
 
         self.setContextMenu(contextMenu)
 

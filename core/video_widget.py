@@ -50,6 +50,8 @@ class VideoWidget(QVideoWidget):
         contextMenu.addMenu(menuHelp)
         contextMenu.addSeparator()
 
+        contextMenu.addAction(self.window.actionExit_2)
+
         contextMenu.exec_(event.globalPos())
 
     def _init_content(self):
@@ -68,20 +70,20 @@ class VideoWidget(QVideoWidget):
     def hide_playbar(self):
         if self.window.isFullScreen():
             self.window.menubar.hide()
-            if self.window.settings.value("preset_2", False) == "false":
+            if self.window.settings.value("preset_2", "false") == "false":
                 self.window.frame_3.hide()
-            if self.window.settings.value("preset_3", False) == "false":
+            if self.window.settings.value("preset_3", "false") == "false":
                 self.window.frame.hide()
-            if self.window.settings.value("preset_4", False) == "false":
+            if self.window.settings.value("preset_4", "false") == "false":
                 self.window.frame_2.hide()  
 
     def show_playbar(self):
         if self.window.isFullScreen():
-            if self.window.settings.value("preset_2", False) == "false":
+            if self.window.settings.value("preset_2", "false") == "false":
                 self.window.frame_3.show()
-            if self.window.settings.value("preset_3", False) == "false":
+            if self.window.settings.value("preset_3", "false") == "false":
                 self.window.frame.show()
-            if self.window.settings.value("preset_4", False) == "false":
+            if self.window.settings.value("preset_4", "false") == "false":
                 self.window.frame_2.show()
 
     def mouseMoveEvent(self, event: QMouseEvent):
@@ -91,7 +93,7 @@ class VideoWidget(QVideoWidget):
             if not self.isDragging: 
                 self.isDragging = True 
             if not self.window.isFullScreen():
-                if self.window.settings.value("movable_window", True) == 'true':
+                if self.window.settings.value("movable_window", "false") == 'true':
                     self.window.move(event.globalPos() - self.drag_position)
         
         self.mouse_timer.stop() 

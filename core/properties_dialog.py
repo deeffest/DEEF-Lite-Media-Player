@@ -14,7 +14,6 @@ class PropertiesDlg(QDialog):
         name,
         settings,
         file_path,
-        filter_,
         video_duration_ms,
         parent=None
     ):
@@ -25,7 +24,6 @@ class PropertiesDlg(QDialog):
         self.window = parent
         self.settings = settings
         self.file_path = file_path
-        self.filter_ = filter_
         self.video_duration_ms = video_duration_ms
 
         loadUi(

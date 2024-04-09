@@ -1,8 +1,5 @@
-1.1 Update!
-- Changed and improved application component styles.
-- Removed the ability to change the application theme style, now the Fusion style will always be used by default.
-- Fixed a bug where switching to "Top of all windows" mode hid the window from the user's view.
-- Added the ability to enable the tray when closing the main window.
-- Fixed a bug that when opening a folder, other multimedia from other folders in the open folder were added to the playlist
-- Added the ability to drag and drop your media files and folders on your pc into the app window.
-- Other changes and improvements.
+Update 1.2!
+- Small changes/fixes to the jump to a certain point function in video/audio.
+- Changed the way to check if a file is a media file by using the mimetypes library instead of the extension list.
+- Minor changes to the application interface styles.
+- Other bug fixes and improvements.

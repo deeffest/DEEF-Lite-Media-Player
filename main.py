@@ -7,22 +7,8 @@ import sys
 from core.main_window import Window
 
 name = "DEEF Lite Media Player"
-version = "1.1"
+version = "1.2"
 current_dir = os.path.dirname(os.path.abspath(__file__))
-
-supported_formats = [
-    "mp3", "wav", "ogg", "flac", 
-    "aac", "wma", "m4a", "opus", 
-    "webm", "mp4", "avi", "mov",
-    "m3u", "3gpp", "mkv"
-]
-filter_ = "Media Files ({})".format(' '.join('*.' + fmt for fmt in supported_formats))
-
-def is_media_file(file_path):
-    _, file_extension = os.path.splitext(file_path)
-    file_extension = file_extension[1:] 
-
-    return file_extension in supported_formats
 
 def set_app_palette():
     app_palette = QPalette()
@@ -66,7 +52,7 @@ if __name__ == '__main__':
 
     file_path = None
     for arg in sys.argv[1:]:
-        if os.path.exists(arg) and is_media_file(arg):
+        if os.path.exists(arg):
             file_path = arg
             break
 
@@ -74,7 +60,6 @@ if __name__ == '__main__':
         name,
         version,
         current_dir,
-        filter_,
         settings,
         file_path=file_path
     )

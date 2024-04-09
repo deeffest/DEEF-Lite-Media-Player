@@ -12,7 +12,6 @@ class GoToDlg(QDialog):
         name,
         settings,
         file_path,
-        filter_,
         current_time_fmt,
         video_duration_ms,
         parent=None
@@ -24,7 +23,6 @@ class GoToDlg(QDialog):
         self.window = parent
         self.settings = settings
         self.file_path = file_path
-        self.filter_ = filter_
         self.current_time_fmt = current_time_fmt
         self.video_duration_ms = video_duration_ms
 
@@ -39,13 +37,8 @@ class GoToDlg(QDialog):
     def _init_content(self):
         self.lineEdit.setText(self.current_time_fmt)
         self._setup_time_validator()
-
+        
         self.label_2.setPixmap(QPixmap(f"{self.current_dir}/resources/icons/{self.window.theme}/schedule_white_24dp.svg"))
-
-    def _setup_time_validator(self):
-        time_format_regex = QRegExp("^(\\d{1,2}:)?([0-5]?\\d):([0-5]\\d)$")
-        time_validator = QRegExpValidator(time_format_regex, self.lineEdit)
-        self.lineEdit.setValidator(time_validator)
 
     def _init_connect(self):
         self.buttonBox.accepted.connect(self.on_ok_clicked) 
@@ -55,10 +48,22 @@ class GoToDlg(QDialog):
         time_text = self.lineEdit.text()
         time_ms = self._convert_time_to_ms(time_text)
 
-        if time_ms is not None and self.window and self.window.player:
+        if time_ms is None:
+            return
+
+        if time_ms > self.video_duration_ms:
+            QMessageBox.warning(self, "Invalid time", "The specified time exceeds the duration of the video.")
+            return
+
+        if self.window and self.window.player:
             self.window.player.setPosition(time_ms)
             self.window.player.pause()
             self.accept()
+
+    def _setup_time_validator(self):
+        time_format_regex = QRegExp("^[0-9:]*$")
+        time_validator = QRegExpValidator(time_format_regex, self.lineEdit)
+        self.lineEdit.setValidator(time_validator)
     
     def _convert_time_to_ms(self, time_str):
         parts = time_str.split(':')

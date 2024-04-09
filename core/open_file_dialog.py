@@ -15,7 +15,6 @@ class OpenFileDlg(QDialog):
         name,
         settings,
         file_path,
-        filter_,
         parent=None
     ):
         super().__init__(parent)
@@ -25,7 +24,6 @@ class OpenFileDlg(QDialog):
         self.window = parent
         self.settings = settings
         self.file_path = file_path
-        self.filter_ = filter_
 
         loadUi(
             f'{self.current_dir}/core/ui/open_file_dialog.ui', self
@@ -80,7 +78,7 @@ class OpenFileDlg(QDialog):
             self,
             "Open Media Files",
             "",
-            f"Media Files ({self.filter_});;All Files (*)",
+            f"All Files (*)",
             options=options
         )
         if file_names:

@@ -12,7 +12,6 @@ class AboutDlg(QDialog):
         name,
         settings,
         file_path,
-        filter_,
         parent=None
     ):
         super().__init__(parent)
@@ -22,7 +21,6 @@ class AboutDlg(QDialog):
         self.window = parent
         self.settings = settings
         self.file_path = file_path
-        self.filter_ = filter_
 
         loadUi(
             f'{self.current_dir}/core/ui/about_dialog.ui', self
