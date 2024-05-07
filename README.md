@@ -2,7 +2,7 @@
 
 ## DEEF Lite Media Player
 
-**Simple application for playing media files on your Windows PC, written in PyQt5 and its QMediaPlayer.**
+Simple application for playing media files on your Windows PC, written in PyQt5 and its QMediaPlayer.
 
 ## Screenshots:
 
