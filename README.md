@@ -2,7 +2,7 @@
 
 ## DEEF Lite Media Player 🎥
 
-DEEF Lite Media Player is a cross-platform media player designed for simplicity, lightweight performance, and broad compatibility across Windows, Linux, and macOS. 
+DEEF Lite Media Player is a cross-platform media player designed for simplicity, lightweight performance, and broad compatibility across Windows and Linux. 
 
 ## ✨ Key Features
 - **Cross-Platform Compatibility**  
@@ -30,8 +30,7 @@ DEEF Lite Media Player is a cross-platform media player designed for simplicity,
 ### Using builds with executable files
 1. Download the archive for your OS from the releases page: [Latest Release](https://github.com/deeffest/DEEF-Lite-Media-Player/releases/latest).
 2. Unzip the archive to any folder.
-3. Go to the folder with the unzipped application and run `dlmplayer.exe` in Windows, `dlmplayer` in Linux.
-> There is no build of the latest version 2.0-beta for macOS, but you can build it yourself from the source code of this repository.
+3. Navigate to the folder with the unzipped application and run the executable file.
 
 ### Using the source code
 1. **Install Python**  
