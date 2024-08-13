@@ -6,7 +6,7 @@ DEEF Lite Media Player is a cross-platform media player designed for simplicity,
 
 ## ✨ Key Features
 - **Cross-Platform Compatibility**  
-  Runs seamlessly on Windows, Linux, and macOS.
+  Runs seamlessly on Windows and Linux.
 
 - **Playlist Management**  
   Create, manage, and play your favorite playlists.
