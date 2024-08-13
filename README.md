@@ -39,7 +39,7 @@ DEEF Lite Media Player is a cross-platform media player designed for simplicity,
    - Windows 10 (22H2) with Python 3.11.3 (64-bit).
    - Windows 11 (23H2) with Python 3.12.5 (64-bit).
    - Ubuntu (24.04) with Python 3.12.3 (64-bit).
-   - Manjaro (24.0.5) without Python.
+   - Manjaro (24.0.5).
    
    [Download Python](https://www.python.org/downloads/)
 
