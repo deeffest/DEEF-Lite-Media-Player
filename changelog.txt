@@ -1,0 +1,8 @@
+## Update 2.0-beta 🎉 (August 13, 2024)
+- A complete rebirth and first 2.0-beta release.
+
+## Update 1.2 🎉 (April 10, 2024)
+- Small changes/fixes to the jump to a certain point function in video/audio.
+- Changed the way to check if a file is a media file by using the mimetypes library instead of the extension list.
+- Minor changes to the application interface styles.
+- Other bug fixes and improvements.

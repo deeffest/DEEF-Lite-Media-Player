@@ -1,1015 +1,940 @@
-import os, sys
+import os
+import logging
+import platform
+import locale
 import webbrowser
-import random 
-import requests
 import mimetypes
+import random
+import resources.resources_rc
+from PySide6.QtWidgets import QMainWindow, QMenuBar, QMenu, QStatusBar, QToolBar, \
+    QDockWidget, QLabel, QMessageBox, QFileDialog, QInputDialog, QListWidgetItem, \
+    QAbstractItemView, QWidget, QLineEdit, QListWidget, QVBoxLayout
+from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput, QMediaMetaData
+from PySide6.QtGui import QIcon, QAction, QActionGroup
+from PySide6.QtCore import QSettings, QUrl, Qt, QTimer, QEvent
+from .video_widget import VideoWidget
+from .clickable_slider import ClickableSlider
+from .update_checker import UpdateChecker
+from packaging import version as pkg_version
 
-from PyQt5.QtWidgets import (
-    qApp, QMainWindow, QFileDialog, QMessageBox,
-    QListWidgetItem, QWidget, QWidgetAction, 
-    QMenu
-)
-from PyQt5.QtGui import QIcon
-from PyQt5.QtMultimedia import (
-    QMediaContent, QMediaPlayer
-)
-from PyQt5.QtCore import QUrl, Qt, QSize
-from PyQt5.QtWinExtras import (
-    QWinThumbnailToolBar, QWinThumbnailToolButton  
-)
-from PyQt5 import uic
+locale.setlocale(locale.LC_ALL, '') 
 
-from core.open_file_dialog import OpenFileDlg
-from core.go_to_dialog import GoToDlg
-from core.properties_dialog import PropertiesDlg
-from core.settings_dialog import SettingsDlg
-from core.about_dialog import AboutDlg
-from core.video_widget import VideoWidget
-from core.init_connect import _init_connect
-from core.init_shortcuts import _init_shortcuts
-from core.init_config import _init_config
-from core.init_icons import _init_icons
-from core.init_styles import _init_styles
-from core.tray_icon import TrayIcon
-
-class Window(QMainWindow):
-    def __init__(
-        self,
-        name,
-        version,
-        current_dir,
-        settings,
-        file_path=None,
-        parent=None
-    ):
+class MainWindow(QMainWindow):
+    def __init__(self, app, theme, media_paths=None, parent=None):
         super().__init__(parent)
+        self.app = app
+        self.theme = theme
+        self.plaform = platform.system()
+        self.settings = QSettings()
+        self.loop_mode = None
+        self.playlist = []
+        self.current_index = -1
+        self.autoplay_enabled = False
 
-        self.win_toolbar = QWinThumbnailToolBar(self)  
-        self.show()
-
-        self.name = name
-        self.version = version
-        self.current_dir = current_dir
-        self.file_path = file_path
-        self.settings = settings
-
-        uic.loadUi(
-            f"{self.current_dir}/core/ui/main_window.ui", self
-        ) 
-
-        self._init_attributes()
-        self._init_window()
-        self._init_content()
-
-    def _init_content(self):
-        self.player = QMediaPlayer(None)
-        
-        self.video_widget = VideoWidget(self)
-        self.horizontalLayout.addWidget(self.video_widget)
-
-        self.create_win_toolbar_buttons()
-        self.create_playlist_menu()
-        self._init_tray_icon()
-
-        if self.file_path is None:
-            pass
-        else:
-            self.open_media(self.file_path)
-
-        _init_connect(self)
-        _init_shortcuts(self)
-        _init_config(self)
-
-    def _init_attributes(self):
-        self.playback_speed = 1.0
-        self.media_muted = False
-        self.media_volume = self.settings.value("media_volume", 100)
-        self.change_media_volume(value=None, player=False)
-        self.horizontalSlider_2.setValue(self.media_volume)
+        self.setWindowTitle("DEEF Lite Media Player")
+        self.setObjectName("MainWindow")
         self.setAcceptDrops(True)
 
-        self.theme = self.settings.value("app_theme", "dark")
-        _init_icons(self, theme=self.theme)
-        _init_styles(self)
+        if self.plaform == "Windows":
+            self.setWindowIcon(QIcon(":/icons/icon_win"))
+        else:
+            self.setWindowIcon(QIcon(":/icons/icon_linux"))        
+            
+        if self.settings.value("geometry") is not None:
+            self.restoreGeometry(self.settings.value("geometry"))
+        else:
+            self.resize(800, 600)
 
-    def open_media(self, file_path):
-        if not self.is_media_file(file_path):
-            return
-        self.file_path = file_path
-        self.setWindowTitle(f"{self.file_path} - {self.name}")
-        self.tray_icon.setToolTip(self.file_path)
-        self.label_3.setText("/")
-        self.control_ui_elements(setEnabled=True)
+        self.media_player = QMediaPlayer(self)
+        self.audio_output = QAudioOutput(self)
+        self.media_player.setAudioOutput(self.audio_output)
+        if self.settings.value("volume") is not None:
+            volume = int(self.settings.value("volume"))
+            self.audio_output.setVolume(volume / 100)
+        self.video_widget = VideoWidget(self)
+        self.media_player.setVideoOutput(self.video_widget)
+        self.setCentralWidget(self.video_widget)
+
+        self.media_player.playbackStateChanged.connect(self.handle_playback_state_changed)
+        self.media_player.mediaStatusChanged.connect(self.handle_media_status_changed)
+        self.media_player.errorOccurred.connect(self.handle_media_error_changed)
+        self.media_player.positionChanged.connect(self.update_slider_position)
+        self.media_player.durationChanged.connect(self.update_slider_duration)
+        self.audio_output.volumeChanged.connect(self.update_slider_volume)
+        self.media_player.tracksChanged.connect(self.handle_tracks_changed)
+
+        self.dock_widget = QDockWidget(self)
+        self.dock_widget.setObjectName("PlaylistDock")
+        self.dock_widget.setWindowTitle("Playlist")
+        self.dock_widget.setTitleBarWidget(QWidget())
+        self.dock_widget.setFeatures(QDockWidget.DockWidgetClosable)
+        self.dock_widget.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.dock_widget.setFocusPolicy(Qt.NoFocus)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.dock_widget)
         
-        if file_path.lower().endswith('.m3u'):
-            self.open_playlist(file_path)
-        else:
-            self.set_media()
+        self.menu_bar = QMenuBar(self)
+        self.menu_bar.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.setMenuBar(self.menu_bar)
 
-    def is_media_file(self, file_path):
-        mime_type, _ = mimetypes.guess_type(file_path)
-        if mime_type is not None:
-            return mime_type.startswith('video/') or mime_type.startswith('audio/')
-        else:
-            return False
+        self.menu_file = QMenu("File")
+        self.menu_bar.addMenu(self.menu_file)
 
-    def open_playlist(self, playlist_path):   
-        try:
-            with open(playlist_path, 'r', encoding='utf-8') as playlist_file:
-                for file_path in playlist_file:
-                    file_path = file_path.strip()
-                    if file_path and not file_path.startswith('#'):
-                        self.add_to_playlist(file_path)
+        self.action_open_file = QAction("Open File")
+        self.action_open_file.setIcon(QIcon(f":/icons/file_{self.theme}"))
+        self.action_open_file.setShortcut("Ctrl+O")
+        self.action_open_file.triggered.connect(self.open_file_dialog)
+        self.menu_file.addAction(self.action_open_file)
+        self.addAction(self.action_open_file)
 
-            if self.playlistUiWidget.listWidget.count() > 0:
-                first_item = self.playlistUiWidget.listWidget.item(0)
-                self.open_media_from_playlist(first_item)
-        except Exception as e: 
-            QMessageBox.critical(self, "Error opening playlist", f"Failed to open the playlist:\n{e}")
+        self.action_open_url = QAction("Open URL")
+        self.action_open_url.setIcon(QIcon(f":/icons/url_{self.theme}"))
+        self.action_open_url.setShortcut("Ctrl+U")
+        self.action_open_url.triggered.connect(self.open_url_dialog)
+        self.menu_file.addAction(self.action_open_url)
+        self.addAction(self.action_open_url)
+
+        self.action_open_folder = QAction("Open Folder")
+        self.action_open_folder.setIcon(QIcon(f":/icons/folder_{self.theme}"))
+        self.action_open_folder.setShortcut("Ctrl+F")
+        self.action_open_folder.triggered.connect(self.open_folder_dialog)
+        self.menu_file.addAction(self.action_open_folder)
+        self.addAction(self.action_open_folder)
+
+        self.action_quit = QAction("Quit")
+        self.action_quit.setIcon(QIcon(f":/icons/quit_{self.theme}"))
+        self.action_quit.setShortcut("Ctrl+Q")
+        self.action_quit.triggered.connect(self.quit)
+        self.menu_file.addSeparator()
+        self.menu_file.addAction(self.action_quit)
+        self.addAction(self.action_quit)
+
+        self.menu_playback = QMenu("Playback")
+        self.menu_bar.addMenu(self.menu_playback)
+        
+        self.action_play_pause = QAction("Play/Pause")
+        self.action_play_pause.setIcon(QIcon(f":/icons/play_{self.theme}"))
+        self.action_play_pause.setShortcut("Space")
+        self.action_play_pause.triggered.connect(self.toggle_play_pause)
+        self.menu_playback.addAction(self.action_play_pause)
+        self.addAction(self.action_play_pause)
+
+        self.action_stop = QAction("Stop")
+        self.action_stop.setIcon(QIcon(f":/icons/stop_{self.theme}"))
+        self.action_stop.setShortcut("Ctrl+S")
+        self.action_stop.triggered.connect(self.stop_media)
+        self.menu_playback.addAction(self.action_stop)
+        self.addAction(self.action_stop)
+
+        self.menu_loop = QMenu("Loop")
+        self.menu_loop.setIcon(QIcon(f":/icons/loop_{self.theme}"))
+        self.menu_playback.addMenu(self.menu_loop)
+
+        self.action_loop_none = QAction("No Loop", self)
+        self.action_loop_none.setCheckable(True)
+        self.action_loop_none.triggered.connect(lambda: self.set_loop_mode(None))
+        self.menu_loop.addAction(self.action_loop_none)
+
+        self.action_loop_single = QAction("Loop Single", self)
+        self.action_loop_single.setCheckable(True)
+        self.action_loop_single.triggered.connect(lambda: self.set_loop_mode("single"))
+        self.menu_loop.addAction(self.action_loop_single)
+
+        self.action_loop_playlist = QAction("Loop Playlist", self)
+        self.action_loop_playlist.setCheckable(True)
+        self.action_loop_playlist.triggered.connect(lambda: self.set_loop_mode("playlist"))
+        self.menu_loop.addAction(self.action_loop_playlist)
+
+        loop_action_group = QActionGroup(self)
+        loop_action_group.addAction(self.action_loop_none)
+        loop_action_group.addAction(self.action_loop_single)
+        loop_action_group.addAction(self.action_loop_playlist)
+        self.action_loop_none.setChecked(True)
+
+        self.action_mute_unmute = QAction("Mute/Unmute")
+        self.action_mute_unmute.setIcon(QIcon(f":/icons/unmute_{self.theme}"))
+        self.action_mute_unmute.setShortcut("Ctrl+M")
+        self.action_mute_unmute.triggered.connect(self.toggle_mute_unmute)
+        self.menu_playback.addAction(self.action_mute_unmute)
+        self.addAction(self.action_mute_unmute)
+
+        self.menu_speed = QMenu("Speed")
+        self.menu_speed.setIcon(QIcon(f":/icons/speed_{self.theme}"))
+        self.menu_playback.addMenu(self.menu_speed)
+
+        self.action_speed_05x = QAction("0.5x", self)
+        self.action_speed_05x.setCheckable(True)
+        self.action_speed_05x.triggered.connect(lambda: self.set_playback_rate(0.5))
+        self.menu_speed.addAction(self.action_speed_05x)
+
+        self.action_speed_1x = QAction("1.0x", self)
+        self.action_speed_1x.setCheckable(True)
+        self.action_speed_1x.setChecked(True)
+        self.action_speed_1x.triggered.connect(lambda: self.set_playback_rate(1.0))
+        self.menu_speed.addAction(self.action_speed_1x)
+
+        self.action_speed_15x = QAction("1.5x", self)
+        self.action_speed_15x.setCheckable(True)
+        self.action_speed_15x.triggered.connect(lambda: self.set_playback_rate(1.5))
+        self.menu_speed.addAction(self.action_speed_15x)
+
+        self.action_speed_2x = QAction("2.0x", self)
+        self.action_speed_2x.setCheckable(True)
+        self.action_speed_2x.triggered.connect(lambda: self.set_playback_rate(2.0))
+        self.menu_speed.addAction(self.action_speed_2x)
+
+        self.menu_audio_tracks = QMenu("Audio Tracks")
+        self.menu_playback.addMenu(self.menu_audio_tracks)
+        self.audio_tracks_group = QActionGroup(self)
+        self.audio_tracks_group.setExclusive(True)
+
+        self.menu_video_tracks = QMenu("Video Tracks")
+        self.menu_playback.addMenu(self.menu_video_tracks)
+        self.video_tracks_group = QActionGroup(self)
+        self.video_tracks_group.setExclusive(True)
+
+        self.menu_subtitle_tracks = QMenu("Subtitle Tracks")
+        self.menu_subtitle_tracks.setIcon(QIcon(f":/icons/subtitle_{self.theme}"))
+        self.menu_playback.addMenu(self.menu_subtitle_tracks)
+        self.subtitle_tracks_group = QActionGroup(self)
+        self.subtitle_tracks_group.setExclusive(True)
+
+        self.add_placeholder_if_empty(self.menu_audio_tracks)
+        self.add_placeholder_if_empty(self.menu_video_tracks)
+        self.add_placeholder_if_empty(self.menu_subtitle_tracks)
+
+        self.menu_playlist = QMenu("Playlist")
+        self.menu_bar.addMenu(self.menu_playlist)
+
+        self.action_add_files_to_playlist = QAction("Add File(s) to Playlist")
+        self.action_add_files_to_playlist.setIcon(QIcon(f":/icons/add_{self.theme}"))
+        self.action_add_files_to_playlist.setShortcut("Ctrl+L")
+        self.action_add_files_to_playlist.triggered.connect(self.add_files_to_playlist)
+        self.menu_playlist.addAction(self.action_add_files_to_playlist)
+        self.addAction(self.action_add_files_to_playlist)
+
+        self.action_shuffle = QAction("Shuffle")
+        self.action_shuffle.setIcon(QIcon(f":/icons/shuffle_{self.theme}"))
+        self.action_shuffle.setShortcut("Ctrl+H")
+        self.action_shuffle.triggered.connect(self.shuffle_playlist)
+        self.menu_playlist.addSeparator()
+        self.menu_playlist.addAction(self.action_shuffle)
+
+        self.action_clear_all_playlist = QAction("Clear All Playlist")
+        self.action_clear_all_playlist.setIcon(QIcon(f":/icons/clear_all_{self.theme}"))
+        self.action_clear_all_playlist.setShortcut("Ctrl+C")
+        self.action_clear_all_playlist.triggered.connect(self.clear_all_playlist)
+        self.menu_playlist.addAction(self.action_clear_all_playlist)
+        self.addAction(self.action_clear_all_playlist)
+
+        self.action_clear_except_current = QAction("Clear Except Current")
+        self.action_clear_except_current.setIcon(QIcon(f":/icons/clear_except_current_{self.theme}"))
+        self.action_clear_except_current.setShortcut("Ctrl+E")
+        self.action_clear_except_current.triggered.connect(self.clear_except_current)
+        self.menu_playlist.addAction(self.action_clear_except_current)
+        self.addAction(self.action_clear_except_current)
+
+        self.action_previous = QAction("Previous")
+        self.action_previous.setIcon(QIcon(f":/icons/previous_{self.theme}"))
+        self.action_previous.setShortcut("Ctrl+Left")
+        self.action_previous.triggered.connect(self.play_previous)
+        self.menu_playlist.addSeparator()
+        self.menu_playlist.addAction(self.action_previous)
+        self.addAction(self.action_previous)
+
+        self.action_next = QAction("Next")
+        self.action_next.setIcon(QIcon(f":/icons/next_{self.theme}"))
+        self.action_next.setShortcut("Ctrl+Right")
+        self.action_next.triggered.connect(self.play_next)
+        self.menu_playlist.addAction(self.action_next)
+        self.addAction(self.action_next)
+
+        self.action_autoplay = QAction("Autoplay")
+        self.action_autoplay.setCheckable(True)
+        self.action_autoplay.setShortcut("Ctrl+A")
+        self.action_autoplay.triggered.connect(self.toggle_autoplay)
+        self.menu_playlist.addSeparator()
+        self.menu_playlist.addAction(self.action_autoplay)
+        self.addAction(self.action_autoplay)
+        
+        self.menu_view = QMenu("View")
+        self.menu_bar.addMenu(self.menu_view)
+
+        self.action_fullscreen = QAction("Fullscreen")
+        self.action_fullscreen.setIcon(QIcon(f":/icons/fullscreen_{self.theme}"))
+        self.action_fullscreen.setShortcut("F11")
+        self.action_fullscreen.triggered.connect(self.toggle_fullscreen)
+        self.menu_view.addAction(self.action_fullscreen)
+        self.addAction(self.action_fullscreen)
+
+        self.action_playlist = self.dock_widget.toggleViewAction()
+        self.action_playlist.setIcon(QIcon(f":/icons/playlist_{self.theme}"))
+        self.action_playlist.setShortcut("Ctrl+P")
+        self.menu_view.addSeparator()
+        self.menu_view.addAction(self.action_playlist)
+        self.addAction(self.action_playlist)
+
+        self.menu_help = QMenu("Help")
+        self.menu_bar.addMenu(self.menu_help)
+
+        self.action_search_for_updates = QAction("Search for Updates")
+        self.action_search_for_updates.setIcon(QIcon(f":/icons/search_{self.theme}"))
+        self.action_search_for_updates.triggered.connect(self.check_updates)
+        self.menu_help.addAction(self.action_search_for_updates)
+
+        self.action_about = QAction("About")
+        self.action_about.setIcon(QIcon(f":/icons/about_{self.theme}"))
+        self.action_about.triggered.connect(self.about_app)
+        self.menu_help.addSeparator()
+        self.menu_help.addAction(self.action_about)
+
+        self.action_about_qt = QAction("About Qt")
+        self.action_about_qt.setIcon(QIcon(f":/qt-project.org/logos/pysidelogo.png"))
+        self.action_about_qt.triggered.connect(self.about_qt)
+        self.menu_help.addAction(self.action_about_qt)
+
+        self.seek_slider = ClickableSlider(Qt.Horizontal)
+        self.seek_slider.setCursor(Qt.PointingHandCursor)
+        self.seek_slider.valueChanged.connect(self.seek_media)
+
+        self.volume_slider = ClickableSlider(Qt.Horizontal)
+        self.volume_slider.setMaximumWidth(70)
+        self.volume_slider.setCursor(Qt.PointingHandCursor)
+        self.volume_slider.setRange(0, 100)
+        self.volume_slider.setValue(self.audio_output.volume() * 100)
+        self.volume_slider.valueChanged.connect(self.set_volume)
+
+        self.elapsed_time_label = QLabel("00:00")
+        self.elapsed_time_label.setStyleSheet("QLabel { color: gray; }")
+        self.separator_time_label = QLabel("/")
+        self.separator_time_label.setStyleSheet("QLabel { color: gray; }")
+        self.total_time_label = QLabel("00:00")
+
+        self.tool_bar = QToolBar(self)
+        self.tool_bar.setObjectName("Playbar") 
+        self.tool_bar.setMovable(False)
+        self.tool_bar.setFloatable(False)
+        self.tool_bar.setWindowTitle("Playbar")
+        self.tool_bar.addAction(self.action_previous)
+        self.tool_bar.addAction(self.action_play_pause)
+        self.tool_bar.addAction(self.action_next)
+        self.tool_bar.addSeparator()
+        self.tool_bar.addWidget(self.elapsed_time_label)
+        self.tool_bar.addWidget(self.seek_slider)
+        self.tool_bar.addWidget(self.total_time_label)
+        self.tool_bar.addSeparator()
+        self.tool_bar.addAction(self.action_mute_unmute)
+        self.tool_bar.addWidget(self.volume_slider)
+        self.tool_bar.addAction(self.action_playlist)
+        self.tool_bar.addAction(self.action_fullscreen)
+        self.tool_bar.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.addToolBar(Qt.BottomToolBarArea, self.tool_bar)
+
+        self.action_play_from_playlist = QAction("Play selected item")
+        self.action_play_from_playlist.setIcon(QIcon(f":/icons/play_{self.theme}"))
+        self.action_play_from_playlist.triggered.connect(self.play_selected_item)
+        self.addAction(self.action_play_from_playlist)
+        
+        self.action_clear = QAction("Remove selected item")
+        self.action_clear.setIcon(QIcon(f":/icons/clear_{self.theme}"))
+        self.action_clear.triggered.connect(self.clear_selected_item)
+
+        self.dock_container = QWidget(self.dock_widget)
+        self.dock_layout = QVBoxLayout(self.dock_container)
+        self.dock_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.search_line_edit = QLineEdit(self.dock_container)
+        self.search_line_edit.setPlaceholderText("Search...")
+        self.search_line_edit.setClearButtonEnabled(True)
+        self.search_line_edit.setFocusPolicy(Qt.NoFocus)
+        self.search_line_edit.installEventFilter(self)
+        self.search_line_edit.textChanged.connect(self.filter_playlist)
+        self.dock_layout.addWidget(self.search_line_edit)
+
+        self.playlist_widget = QListWidget(self.dock_container)
+        self.playlist_widget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.playlist_widget.setDragDropMode(QAbstractItemView.InternalMove)
+        self.playlist_widget.setDefaultDropAction(Qt.MoveAction)
+        self.playlist_widget.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.playlist_widget.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.playlist_widget.model().rowsMoved.connect(self.update_playlist_order)
+        self.playlist_widget.itemDoubleClicked.connect(self.play_selected_item)
+        self.playlist_widget.customContextMenuRequested.connect(self.show_playlist_context_menu)
+        self.dock_layout.addWidget(self.playlist_widget)
+
+        self.dock_widget.setWidget(self.dock_container)
+
+        self.status_bar = QStatusBar(self)
+        self.setStatusBar(self.status_bar)
+
+        self.media_player_state_label = QLabel(self.status_bar)
+        self.media_player_state_label.setText("")
+        self.status_bar.addWidget(self.media_player_state_label)
+
+        self.media_player_status_label = QLabel(self.status_bar)
+        self.media_player_status_label.setText("")
+        self.status_bar.addPermanentWidget(self.media_player_status_label)
+
+        if self.settings.value("windowState") is not None:
+            self.restoreState(self.settings.value("windowState"))
+            
+        self.check_updates()
+
+        if media_paths:
+            self.add_to_playlist(media_paths)
+            if self.playlist:
+                self.current_index = 0
+                self.play_media(self.playlist[self.current_index])
     
-    def set_media(self):
-        self.player.setMedia(QMediaContent(QUrl.fromLocalFile(self.file_path)))
-        self.player.setVideoOutput(self.video_widget)
-        self.player.setVolume(self.media_volume)
-        self.player.play()
-
-        self.setCursor(Qt.ArrowCursor)
-        self.set_playlist()
-
-        self.video_widget.hide()
-        self.video_widget.show()
-
-    def set_playlist(self):    
-        item = QListWidgetItem(self.file_path)
-        item.setToolTip(item.text())  
-
-        playing_items = self.playlistUiWidget.listWidget.findItems(self.file_path, Qt.MatchExactly)
-        if not playing_items:
-            self.playlistUiWidget.listWidget.addItem(item)
-            playing_items = self.playlistUiWidget.listWidget.findItems(self.file_path, Qt.MatchExactly)
-
-        for i in range(self.playlistUiWidget.listWidget.count()):
-            item = self.playlistUiWidget.listWidget.item(i)
-            if item in playing_items:
-                item.setIcon(QIcon(
-                    f"{self.current_dir}/resources/icons/{self.theme}/play_arrow_white_24dp.svg"
-                ))
-                item.setSelected(True)
-            else:
-                item.setIcon(QIcon())
-                item.setSelected(False)
-
-        self.check_playlist_items()
-        
-    def open_media_from_playlist(self, item):
-        file_path = item.text() 
-        self.open_media(file_path)
-
-    def add_to_playlist(self, url):
-        playing_items = self.playlistUiWidget.listWidget.findItems(url, Qt.MatchExactly)
-        if not playing_items:
-            item = QListWidgetItem(url)
-            item.setToolTip(url)
-            self.playlistUiWidget.listWidget.addItem(item)
-
-    def playlist_cleaner(self):
-        self.playlistUiWidget.listWidget.clear()
-        self.close_media()
-
-    def stop_media(self):
-        self.player.stop()
-
-    def rewind_media(self):
-        position = self.player.position() 
-        if position > 10000:
-            self.player.setPosition(max(0, position - 10 * 1000))
-
-    def forward_media(self):
-        position = self.player.position()  
-        duration = self.player.duration() 
-        if duration-position > 10000:
-            self.player.setPosition(min(duration, position + 10 * 1000))
-
-    def change_media_volume(self, value=None, player=None):
-        if player:
-            self.player.setVolume(int(value))
-        if value:
-            self.horizontalSlider_2.setValue(int(value))
-            self.media_volume = value
-            
-        if self.media_volume <= 0:
-            self.actionDown_2.setEnabled(False)
-            self.actionUp_2.setEnabled(True)
-        elif self.media_volume >= 100:
-            self.actionUp_2.setEnabled(False)
-            self.actionDown_2.setEnabled(True)
-
-    def toggle_media_repeat(self, checked=None):
-        if checked:
-            self.actionRepeat.setChecked(True)
-        elif checked == False:
-            self.actionRepeat.setChecked(False)
-        elif checked is None:     
-            if self.actionRepeat.isChecked():
-                self.actionRepeat.setChecked(False)
-            else:
-                self.actionRepeat.setChecked(True)
-
-    def play_pause_media(self, event=None):
-        if self.player.state() == QMediaPlayer.PlayingState:
-            self.player.pause()
-
-        elif self.player.state() == QMediaPlayer.PausedState:
-            self.player.play()
-
-        elif self.player.state() == QMediaPlayer.StoppedState:
-            if self.file_path is not None:
-                self.open_media(self.file_path)
-
-    def check_media_state(self, status):
-        if status == QMediaPlayer.PlayingState:
-            self.toolButton_2.setChecked(False)
-            self.tool_btn_play_pause.setIcon(QIcon(
-                f"{self.current_dir}/resources/icons/dark/pause_white_24dp.svg"
-            ))
-            self.actionPlay_Pause.setChecked(False)
-
-        elif status == QMediaPlayer.PausedState:
-            self.toolButton_2.setChecked(True)
-            self.tool_btn_play_pause.setIcon(QIcon(
-                f"{self.current_dir}/resources/icons/dark/play_arrow_white_24dp.svg"
-            ))
-            self.actionPlay_Pause.setChecked(True)
-
-        elif status == QMediaPlayer.StoppedState:
-            self.toolButton_2.setChecked(True)
-            self.tool_btn_play_pause.setIcon(QIcon(
-                f"{self.current_dir}/resources/icons/dark/play_arrow_white_24dp.svg"
-            ))
-            self.actionPlay_Pause.setChecked(True)
-
-    def check_media_status(self, status):
-        if status == QMediaPlayer.EndOfMedia:
-            if self.actionRepeat.isChecked():
-                if self.file_path is not None:
-                    self.open_media(self.file_path)
-            elif self.actionAutoPlay.isChecked():
-                if self.file_path is not None:
-                    self.open_next_media()
-            self.label.setText("End Of Media")
-
-        if status == QMediaPlayer.LoadingMedia:
-            self.label.setText("Loading Media")
-        if status == QMediaPlayer.LoadedMedia:
-            self.label.setText("Loaded Media")
-        if status == QMediaPlayer.StalledMedia:
-            self.label.setText("Stalled Media")
-        if status == QMediaPlayer.BufferingMedia:
-            self.label.setText("Buffering Media")
-        if status == QMediaPlayer.BufferedMedia:
-            self.label.setText("Buffered Media")
-        if status == QMediaPlayer.InvalidMedia:
-            self.label.setText("Invalid Media")
-
-    def handle_media_errors(self, error):
-        error_message = self.player.errorString()
-
-        if error == QMediaPlayer.ResourceError:
-            self.label.setText(f"Resource Error: {error_message}")
-        elif error == QMediaPlayer.FormatError:
-            self.label.setText(f"Format Error: {error_message}")
-        elif error == QMediaPlayer.NetworkError:
-            self.label.setText(f"Network Error: {error_message}")
-        elif error == QMediaPlayer.AccessDeniedError:
-            self.label.setText(f"Access Denied Error: {error_message}")
-        else:
-            self.label.setText(f"Unknown Error: {error_message}")
-
-    def shuffle_playlist(self):
-        items = []
-        for index in range(self.playlistUiWidget.listWidget.count()):
-            items.append(self.playlistUiWidget.listWidget.takeItem(0))
-        
-        random.shuffle(items)
-        
-        for item in items:    
-            self.playlistUiWidget.listWidget.addItem(item)
-            for i in range(self.playlistUiWidget.listWidget.count()):
-                playing_items = self.playlistUiWidget.listWidget.findItems(self.file_path, Qt.MatchExactly)
-                item = self.playlistUiWidget.listWidget.item(i)
-                if item in playing_items:
-                    item.setIcon(QIcon(
-                        f"{self.current_dir}/resources/icons/{self.theme}/play_arrow_white_24dp.svg"
-                    ))
-                    item.setSelected(True)
-                else:
-                    item.setIcon(QIcon())
-                    item.setSelected(False)
-
-    def save_playlist_as_m3u(self):
-        self.show()
-
-        file_name, _ = QFileDialog.getSaveFileName(
-            self, 
-            "Save Playlist", 
-            "", 
-            "M3U Playlist (*.m3u)"
-        )
-        if not file_name:
-            return
-        
-        with open(file_name, 'w', encoding='utf-8') as playlist_file:
-            for index in range(self.playlistUiWidget.listWidget.count()):
-                item = self.playlistUiWidget.listWidget.item(index)
-                playlist_file.write(f"{item.text()}\n")
-
-    def open_settings_dialog(self):
-        self.show()
-        Dlg = SettingsDlg(
-            self.current_dir,
-            self.name,
-            self.settings, 
-            self.file_path, 
-            parent=self
-            )
-        Dlg.exec_()
-
-    def handle_on_top_window(self, checked=None):
-        if checked:
-            self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
-            self.settings.setValue("on_top_window", "true")
-        elif checked == False:
-            self.setWindowFlag(Qt.WindowStaysOnTopHint, False)
-            self.settings.setValue("on_top_window", "false")
-        elif checked is None:
-            if self.actionOn_Top.isChecked():
-                self.setWindowFlag(Qt.WindowStaysOnTopHint, False)
-                self.settings.setValue("on_top_window", "true")
-                self.actionOn_Top.setChecked(False) 
-            else:
-                self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
-                self.settings.setValue("on_top_window", "true")
-                self.actionOn_Top.setChecked(True)
-        self.show()
-
-    def handle_movable_window(self, checked=None):
-        if checked:
-            self.settings.setValue("movable_window", "true") 
-        elif checked == False:
-            self.settings.setValue("movable_window", "false") 
-        elif checked is None:
-            if self.actionMovable.isChecked():
-                self.settings.setValue("movable_window", "false")
-                self.actionMovable.setChecked(False) 
-            else:
-                self.settings.setValue("movable_window", "true") 
-                self.actionMovable.setChecked(True) 
-
-    def handle_frameless_window(self, checked=None):
-        if checked:
-            self.setWindowFlag(Qt.FramelessWindowHint, True)
-            self.settings.setValue("frameless_window", "true")
-        elif checked == False:
-            self.setWindowFlag(Qt.FramelessWindowHint, False)
-            self.settings.setValue("frameless_window", "false")
-        elif checked is None:
-            if self.actionFrameless.isChecked():
-                self.setWindowFlag(Qt.FramelessWindowHint, False)
-                self.settings.setValue("frameless_window", "false")
-                self.actionFrameless.setChecked(False)
-            else:
-                self.setWindowFlag(Qt.FramelessWindowHint, True)
-                self.settings.setValue("frameless_window", "true")
-                self.actionFrameless.setChecked(True)
-        self.show()
-
-    def open_fullscreen(self):   
-        if self.isFullScreen():
-            self.showNormal()
-            self.actionFullscreen.setChecked(False)
-
-            if self.settings.value("preset_1", "false") == "false":
-                self.menubar.show()
-            if self.settings.value("preset_2", "false") == "false":
-                self.frame_3.show()
-            if self.settings.value("preset_3", "false") == "false":
-                self.frame.show()
-            if self.settings.value("preset_4", "false") == "false":
-                self.frame_2.show()
-        else:
-            self.showFullScreen()
-            self.actionFullscreen.setChecked(True)
-            
-            self.menubar.hide()
-            self.frame_3.hide()
-            self.frame.hide()
-            self.frame_2.hide()
-
-    def increase_media_volume(self):
-        if self.media_volume < 100:
-            self.media_volume += 15
-            if self.media_volume >= 100:
-                self.media_volume = 100
-                self.actionUp_2.setEnabled(False)
-            self.actionDown_2.setEnabled(True)
-
-        self.change_media_volume(self.media_volume, player=True)
-
-    def decrease_media_volume(self):
-        if self.media_volume > 0:
-            self.media_volume -= 15
-            if self.media_volume <= 0:
-                self.media_volume = 0
-                self.actionDown_2.setEnabled(False)
-            self.actionUp_2.setEnabled(True)
-        
-        self.change_media_volume(self.media_volume, player=True)
-
-    def toggle_media_mute(self):
-        self.media_muted = not self.media_muted
-        self.player.setMuted(self.media_muted)
-
-        self.actionMute_Unmute_2.setChecked(self.media_muted)
-        self.toolButton_4.setChecked(self.media_muted)
-
-    def increase_playback_speed(self):
-        if self.playback_speed >= 1.0:
-            self.playback_speed += 0.5
-            if self.playback_speed >= 2.0:
-                self.playback_speed = 2.0
-                self.actionUp_3.setEnabled(False)
-            self.actionDown_3.setEnabled(True)
-        else:
-            self.playback_speed += 0.25000
-            if self.playback_speed >= 2.0:
-                self.playback_speed = 2.0
-                self.actionUp_3.setEnabled(False)
-            self.actionDown_3.setEnabled(True)
-
-        self.set_media_speed()
-
-    def decrease_playback_speed(self):
-        if self.playback_speed <= 1.0:
-            self.playback_speed -= 0.25000
-            if self.playback_speed <= 0.5:
-                self.playback_speed = 0.5
-                self.actionDown_3.setEnabled(False)
-            self.actionUp_3.setEnabled(True)
-        else:
-            self.playback_speed -= 0.5
-            if self.playback_speed <= 0.5:
-                self.playback_speed = 0.5
-                self.actionDown_3.setEnabled(False)
-            self.actionUp_3.setEnabled(True)
-        
-        self.set_media_speed()
-
-    def reset_playback_speed(self):
-        self.playback_speed = 1.0
-        self.actionUp_3.setEnabled(True)
-        self.actionDown_3.setEnabled(True)
-
-        self.set_media_speed()
-
-    def open_previous_media(self):         
-        current_row = self.get_current_playlist_row()
-        if current_row > 0:
-            prev_item = self.playlistUiWidget.listWidget.item(current_row - 1)
-            self.open_media_from_playlist(prev_item)     
-
-    def open_next_media(self):
-        current_row = self.get_current_playlist_row()
-        total_rows = self.playlistUiWidget.listWidget.count()
-        if current_row < total_rows - 1:
-            next_item = self.playlistUiWidget.listWidget.item(current_row + 1)
-            self.open_media_from_playlist(next_item)
-
-    def get_current_playlist_row(self):
-        for i in range(self.playlistUiWidget.listWidget.count()):
-            item = self.playlistUiWidget.listWidget.item(i)
-            if item.text() == self.file_path:
-                return i
-        return -1
-
-    def create_playlist_menu(self):
-        self.playlistUiWidget = QWidget()
-        uic.loadUi(f'{self.current_dir}/core/ui/playlist_frame.ui', self.playlistUiWidget)
-
-        widgetAction = QWidgetAction(self.menuPlaylist)
-        widgetAction.setDefaultWidget(self.playlistUiWidget)
-        self.playlistUiWidget.listWidget.itemDoubleClicked.connect(self.open_media_from_playlist)
-        self.playlistUiWidget.listWidget.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.playlistUiWidget.listWidget.customContextMenuRequested.connect(self.on_context_menu)
-
-        if self.menuPlaylist.actions():
-            firstAction = self.menuPlaylist.actions()[0]
-            self.menuPlaylist.insertAction(firstAction, widgetAction)
-
-    def on_context_menu(self, position):        
-        item = self.playlistUiWidget.listWidget.currentItem()
-        row = self.playlistUiWidget.listWidget.row(item)
-        if item is None:
-            return
-
-        menu = QMenu()
-        open_action = menu.addAction("Play")
-        menu.addSeparator()
-        remove_action = menu.addAction("Remove from Playlist")
-        action = menu.exec_(self.playlistUiWidget.listWidget.viewport().mapToGlobal(position))
-        
-        if action == open_action:
-            self.open_media_from_playlist(item)
-        elif action == remove_action:
-            if item.text() == self.file_path:
-                count = self.playlistUiWidget.listWidget.count()
-                if row < count - 1:
-                    self.open_next_media()
-                elif count > 1:
-                    self.open_previous_media()
-                else:
-                    self.playlist_cleaner()
-                    return
-            self.playlistUiWidget.listWidget.takeItem(row)
-
-    def check_playlist_items(self):
-        num_items = self.playlistUiWidget.listWidget.count()
-
-        if num_items > 0:
-            self.actionSave_As.setEnabled(True)
-            self.actionClear.setEnabled(True)
-            self.actionShuffle.setEnabled(True)
-        else:
-            self.actionSave_As.setEnabled(False)
-            self.actionClear.setEnabled(False)
-            self.actionShuffle.setEnabled(False)
-
-    def set_media_speed(self):
-        self.player.setPlaybackRate(self.playback_speed)
-
-    def close_media(self):
-        self.player.setMedia(QMediaContent(QUrl.fromLocalFile(None)))
-        self.player.setVideoOutput(self.video_widget)
-
-        self.video_widget.hide()
-        self.video_widget.show()
-
-        self.toolButton_2.setChecked(False)
-        self.control_ui_elements(setEnabled=False)
-        self.setWindowTitle(self.name)
-        self.file_path = None
-
-        status_labels = [
-            self.label,
-            self.label_2,
-            self.label_3,
-            self.label_4
-        ]
-        for status_label in status_labels:
-            status_label.setText("")
+    def is_valid_mime_type(self, file_path):
+        mime_type, _ = mimetypes.guess_type(file_path)
+        if mime_type:
+            return mime_type.startswith('audio/') or mime_type.startswith('video/')
+        return False
+    
+    def is_valid_url(self, url):
+        return url.lower().startswith(('http://', 'https://'))
 
     def open_file_dialog(self):
-        self.show()
+        file_dialog = QFileDialog(self)
+        file_dialog.setFileMode(QFileDialog.ExistingFile)
+        if file_dialog.exec():
+            selected_file = file_dialog.selectedFiles()[0]
+            if self.is_valid_mime_type(selected_file):
+                self.stop_media()
+                index = self.add_to_playlist([selected_file])
+                self.current_index = index
+                self.play_media(self.playlist[self.current_index])
 
-        options = QFileDialog.Options()
-        options |= QFileDialog.ReadOnly
-        file_name, _ = QFileDialog.getOpenFileName(
-            self,
-            "Open Media File",
-            "",
-            f"All Files (*)",
-            options=options
-        )
-        if file_name:
-            self.playlist_cleaner()
-            self.open_media(file_name)
+    def open_url_dialog(self):
+        open_url_dialog = QInputDialog(self)
+        open_url_dialog.setInputMode(QInputDialog.TextInput)
+        open_url_dialog.setWindowTitle("Open URL")
+        open_url_dialog.setLabelText("Enter URL:")
+        open_url_dialog.resize(500, 100)
+        if open_url_dialog.exec():
+            url = open_url_dialog.textValue()
+            if self.is_valid_url(url):
+                self.stop_media()
+                index = self.add_to_playlist([url])
+                self.current_index = index
+                self.play_media(self.playlist[self.current_index])
 
     def open_folder_dialog(self):
-        self.show()
+        folder_dialog = QFileDialog(self)
+        folder_dialog.setFileMode(QFileDialog.Directory)
+        folder_dialog.setOption(QFileDialog.ShowDirsOnly, True)
+        if folder_dialog.exec():
+            selected_folder = folder_dialog.selectedFiles()[0]
+            files = self.get_files_in_folder(selected_folder, recursive=False)
+            valid_files = [file for file in files if self.is_valid_mime_type(file)]
+            if valid_files:
+                self.stop_media()
+                initial_playlist_length = len(self.playlist)
+                self.add_to_playlist(valid_files)
+                self.current_index = initial_playlist_length
+                if self.playlist:
+                    self.play_media(self.playlist[self.current_index])
 
-        options = QFileDialog.Options()
-        options |= QFileDialog.ShowDirsOnly
-        directory = QFileDialog.getExistingDirectory(
-            self,
-            "Open Folder",
-            "",
-            options=options
-        )
-        if directory:     
-            file_paths = []
+    def normalize_path(self, path):
+        return path.replace('\\', '/')
 
-            for file in os.listdir(directory):
-                file_path = os.path.join(directory, file)
-                if os.path.isfile(file_path) and self.is_media_file(file_path):
-                    ext = file_path.rsplit(".", 1)[-1].lower()
-                    if ext != "m3u":
-                        file_paths.append(file_path)
-
-            if file_paths:
-                self.playlist_cleaner()
-                for path in file_paths:
-                    self.add_to_playlist(path)
-                self.open_media(file_paths[0])
-
-    def control_ui_elements(self, setEnabled):
-        ui_elements = [
-            self.horizontalSlider,
-            self.toolButton_5,
-            self.toolButton_2,
-            self.toolButton_9,
-            self.toolButton_6,
-            self.actionPlay_Pause,
-            self.actionStop,
-            self.actionPrevious_2,
-            self.actionNext_2,
-            self.actionRewind,
-            self.actionForward,
-            self.actionGo_To,
-            self.tool_btn_previous,
-            self.tool_btn_play_pause,
-            self.tool_btn_next,
-            self.actionProperties,
-            self.actionClose,
-            self.toolButton,
-            self.toolButton_3
-        ]
-        for element in ui_elements:
-            element.setEnabled(setEnabled)
-
-        if setEnabled:
-            self.tool_btn_previous.setIcon(QIcon(
-                f"{self.current_dir}/resources/icons/dark/skip_previous_white_24dp.svg"
-            ))
-            self.tool_btn_play_pause.setIcon(QIcon(
-                f"{self.current_dir}/resources/icons/dark/pause_white_24dp.svg"
-            ))     
-            self.tool_btn_next.setIcon(QIcon(
-                f"{self.current_dir}/resources/icons/dark/skip_next_white_24dp.svg"
-            ))
+    def get_files_in_folder(self, folder_path, recursive=False):
+        files = []
+        folder_path = self.normalize_path(os.path.normpath(folder_path))
+        
+        if recursive:
+            for root, dirs, file_names in os.walk(folder_path):
+                file_names.sort(key=locale.strxfrm)
+                for file_name in file_names:
+                    file_path = self.normalize_path(os.path.normpath(os.path.join(root, file_name)))
+                    files.append(file_path)
         else:
-            self.tool_btn_previous.setIcon(QIcon(
-                f"{self.current_dir}/resources/icons/disabled/skip_previous_white_24dp.svg"
-            ))
-            self.tool_btn_play_pause.setIcon(QIcon(
-                f"{self.current_dir}/resources/icons/disabled/pause_white_24dp.svg"
-            ))  
-            self.tool_btn_next.setIcon(QIcon(
-                f"{self.current_dir}/resources/icons/disabled/skip_next_white_24dp.svg"
-            ))
-            self.check_playlist_items()
-            for i in range(self.playlistUiWidget.listWidget.count()):
-                item = self.playlistUiWidget.listWidget.item(i)
-                if item:
-                    item.setIcon(QIcon(None))
-                    item.setSelected(False)
+            with os.scandir(folder_path) as entries:
+                entries = sorted(entries, key=lambda e: locale.strxfrm(e.name))
+                for entry in entries:
+                    if entry.is_file():
+                        file_path = self.normalize_path(os.path.normpath(entry.path))
+                        files.append(file_path)
 
-    def create_win_toolbar_buttons(self):
-        self.tool_btn_previous = QWinThumbnailToolButton(self.win_toolbar)
-        self.tool_btn_previous.setToolTip('Previous')
-        self.tool_btn_previous.setEnabled(False)
-        self.tool_btn_previous.setIcon(QIcon(
-            f"{self.current_dir}/resources/icons/disabled/skip_previous_white_24dp.svg"
-        ))
-        self.win_toolbar.addButton(self.tool_btn_previous)
+        return files
+    
+    def add_files_to_playlist(self):
+        file_dialog = QFileDialog(self)
+        file_dialog.setFileMode(QFileDialog.ExistingFiles)
+        if file_dialog.exec():
+            selected_files = file_dialog.selectedFiles()
+            valid_files = [file for file in selected_files if self.is_valid_mime_type(file)]
+            if valid_files:
+                self.add_to_playlist(valid_files)
 
-        self.tool_btn_play_pause = QWinThumbnailToolButton(self.win_toolbar)
-        self.tool_btn_play_pause.setToolTip('Play/Pause')
-        self.tool_btn_play_pause.setEnabled(False)
-        self.tool_btn_play_pause.setIcon(QIcon(
-            f"{self.current_dir}/resources/icons/disabled/pause_white_24dp.svg"
-        ))                     
-        self.win_toolbar.addButton(self.tool_btn_play_pause)
-
-        self.tool_btn_next = QWinThumbnailToolButton(self.win_toolbar)
-        self.tool_btn_next.setToolTip('Next')
-        self.tool_btn_next.setEnabled(False)
-        self.tool_btn_next.setIcon(QIcon(
-            f"{self.current_dir}/resources/icons/disabled/skip_next_white_24dp.svg"
-        ))
-        self.win_toolbar.addButton(self.tool_btn_next)
-
-    def _init_tray_icon(self):
-        self.tray_icon = TrayIcon(            
-            self.current_dir,
-            self.name,
-            self.settings, 
-            parent=self
-        )
-
-    def click_on_preset1(self, checked=None):
-        if checked:
-            self.menubar.hide()
-            self.settings.setValue("preset_1", "true") 
-        elif checked == False:
-            self.menubar.show()
-            self.settings.setValue("preset_1", "false") 
-        elif checked is None:
-            if self.actionPreset1.isChecked():
-                self.menubar.show()
-                self.settings.setValue("preset_1", "false") 
-                self.actionPreset1.setChecked(False)
-            else:                
-                self.menubar.hide()
-                self.settings.setValue("preset_1", "true") 
-                self.actionPreset1.setChecked(True)
-
-    def click_on_preset2(self, checked=None):
-        if checked:
-            self.frame_3.hide() 
-            self.settings.setValue("preset_2", "true")
-        elif checked == False:
-            self.frame_3.show() 
-            self.settings.setValue("preset_2", "false")
-        elif checked is None:
-            if self.actionPreset2.isChecked():
-                self.frame_3.show() 
-                self.settings.setValue("preset_2", "false")
-                self.actionPreset2.setChecked(False)
-            else:                
-                self.frame_3.hide() 
-                self.settings.setValue("preset_2", "true")
-                self.actionPreset2.setChecked(True)
-
-    def click_on_preset3(self, checked=None):
-        if checked:
-            self.frame.hide()
-            self.settings.setValue("preset_3", "true")
-        elif checked == False:
-            self.frame.show() 
-            self.settings.setValue("preset_3", "false")
-        elif checked is None:
-            if self.actionPreset3.isChecked():
-                self.frame.show() 
-                self.settings.setValue("preset_3", "false")
-                self.actionPreset3.setChecked(False)
-            else:                
-                self.frame.hide() 
-                self.settings.setValue("preset_3", "true")
-                self.actionPreset3.setChecked(True)
-
-    def click_on_preset4(self, checked=None):
-        if checked:
-            self.frame_2.hide()
-            self.settings.setValue("preset_4", "true")
-        elif checked == False:
-            self.frame_2.show() 
-            self.settings.setValue("preset_4", "false")
-        elif checked is None:
-            if self.actionPreset4.isChecked():
-                self.frame_2.show() 
-                self.settings.setValue("preset_4", "false")
-                self.actionPreset4.setChecked(False)
-            else:                
-                self.frame_2.hide() 
-                self.settings.setValue("preset_4", "true")
-                self.actionPreset4.setChecked(True)
-
-    def on_slider_enter(self, event):
-        pos = event.pos().x()
-        slider_width = self.horizontalSlider.width() 
-        max_val = min(self.horizontalSlider.maximum(), self.player.duration())
-
-        slider_val = max_val * (pos / slider_width)
-        slider_val = min(max_val, max(0, slider_val))
-
-        self.horizontalSlider.setToolTip(self.format_time(slider_val))
-
-    def on_slider_moved(self, event):
-        pos = event.pos().x()
-        slider_width = self.horizontalSlider.width() 
-        max_val = min(self.horizontalSlider.maximum(), self.player.duration())
-
-        slider_val = max_val * (pos / slider_width)
-        slider_val = min(max_val, max(0, slider_val))
-
-        self.horizontalSlider.setValue(int(slider_val))  
-        self.set_media_position(slider_val)
-
-    def on_slider_pressed(self, event):
-        pos = event.pos().x()
-        slider_width = self.horizontalSlider.width()
-        max_val = min(self.horizontalSlider.maximum(), self.player.duration())
-
-        slider_val = max_val * (pos / slider_width)
-        slider_val = min(max_val, max(0, slider_val))
-
-        self.horizontalSlider.setValue(int(slider_val))
-        self.set_media_position(slider_val)
-
-    def on_volume_slider_pressed(self, event):
-        pos = event.pos().x() 
-        slider_width = self.horizontalSlider_2.width()
-        max_val = self.horizontalSlider_2.maximum()
-        slider_val = max_val * (pos / slider_width)
-        slider_val = min(max_val, max(0, slider_val))
-
-        self.horizontalSlider_2.setValue(int(slider_val))
-
-        self.change_media_volume(slider_val, player=True)
-
-    def on_volume_slider_moved(self, event):
-        pos = event.pos().x() 
-        slider_width = self.horizontalSlider_2.width()
-        max_val = self.horizontalSlider_2.maximum()
-
-        slider_val = max_val * (pos / slider_width)
-        slider_val = min(max_val, max(0, slider_val))
-
-        self.horizontalSlider_2.setValue(int(slider_val)) 
-        self.change_media_volume(slider_val, player=True)
-
-    def set_media_position(self, position):
-        self.player.setPosition(int(position))
-
-    def format_time(self, ms, show_hours=False):
-        s = ms // 1000
-        m = s // 60
-        h = m // 60
-        s = s % 60
-        m = m % 60
-
-        s = int(s)
-        m = int(m)
-        h = int(h)
-
-        if show_hours:
-            return "{:01d}:{:02d}:{:02d}".format(h, m, s)
-        else:
-            if h == 0:
-                return "{:02d}:{:02d}".format(m, s)
-            else:
-                return "{:01d}:{:02d}:{:02d}".format(h, m, s)
-
-    def update_media_duration(self, duration):
-        show_hours = duration >= 3600000  
-        self.horizontalSlider.setMaximum(duration)
-        formatted_time = self.format_time(duration, show_hours)
-        self.label_4.setText(formatted_time)
-
-    def update_media_position(self, position): 
-        duration = self.player.duration()
-        show_hours = duration >= 3600000 
-        formatted_time = self.format_time(position, show_hours)
-        self.label_2.setText(formatted_time)
-        self.horizontalSlider.setValue(max(0, min(position, 2147483647)))
-
-    def open_go_to_dialog(self):
-        duration = self.player.duration()
-        show_hours = duration >= 3600000 
-        current_time_fmt = self.format_time(self.player.position(), show_hours)
-
-        self.show()
-        Dlg = GoToDlg(
-            self.current_dir,
-            self.name,
-            self.settings, 
-            self.file_path, 
-            current_time_fmt,
-            duration,
-            parent=self
-            )
-        Dlg.exec_()
-
-    def open_media_dialog(self):
-        self.show()
-
-        Dlg = OpenFileDlg(
-            self.current_dir,
-            self.name,
-            self.settings, 
-            self.file_path, 
-            parent=self
-            )
-        Dlg.exec_()
-
-    def open_properties_dialog(self):
-        if self.file_path is not None:
-            video_duration_ms = self.format_time(self.player.duration())
+    def add_to_playlist(self, files):
+        for file in files:
+            normalized_file = self.normalize_path(file)
             
-            self.show()
-            Dlg = PropertiesDlg(
-                self.current_dir,
-                self.name,
-                self.settings, 
-                self.file_path, 
-                video_duration_ms,
-                parent=self
-                )
-            Dlg.exec_()
+            if normalized_file not in self.playlist:
+                self.playlist.append(normalized_file)
+                if self.is_valid_mime_type(normalized_file) or self.is_valid_url(normalized_file):
+                    item = QListWidgetItem(normalized_file)
+                    item.setToolTip(normalized_file)
+                    self.playlist_widget.addItem(item)
+        
+        return len(self.playlist) - 1 if self.playlist else -1
+    
+    def play_media(self, media_path):
+        def go():
+            self.media_player.setSource(QUrl.fromLocalFile(media_path))
+            self.media_player.play()
 
-    def open_about_dialog(self):
-        self.show()
+        QTimer.singleShot(1000, lambda: go())
 
-        Dlg = AboutDlg(
-            self.current_dir,
-            self.name,
-            self.settings, 
-            self.file_path, 
-            parent=self
-            )
-        Dlg.exec_()
+        file_name = os.path.basename(media_path)
+        self.setWindowTitle(f"DEEF Lite Media Player - {file_name}")
 
-    def exit_app(self):
-        self.settings.setValue("window_size", self.size())
-        self.settings.setValue("media_volume", self.horizontalSlider_2.value())
-        sys.exit(0)
+        self.update_playlist_icons()
 
-    def check_for_updates(self, startup=None):
-        try:
-            response = requests.get(
-                "https://api.github.com/repos/deeffest/DEEF-Lite-Media-Player/releases/latest"
-            )
-            item_version = response.json()["name"]
-            item_download = response.json().get("html_url")         
-
-            if item_version != self.version:
-                update_msg_box = QMessageBox(self)
-                update_msg_box.setIcon(QMessageBox.Information)
-                update_msg_box.setText(f"New version of DLMPlayer is available!\n\nYour version: {self.version}\nNew version: {item_version}\n\nWould you like to update now?")
-                update_msg_box.setWindowTitle(self.name)
-
-                btn_update = update_msg_box.addButton("Update", QMessageBox.AcceptRole)
-                btn_cancel = update_msg_box.addButton("Cancel", QMessageBox.RejectRole)
-                
-                update_msg_box.setDefaultButton(btn_update)
-                
-                ret = update_msg_box.exec()
-
-                if update_msg_box.clickedButton() == btn_update:
-                    webbrowser.open_new_tab(item_download)
-                    self.exit_app()
-            else:
-                if not startup:
-                    QMessageBox.information(self, 
-                        self.name, 
-                        f"No new versions of DLMPlayer were found.\n\nYour version: {self.version}\nLatest version: {item_version}")
-        except Exception as e:
-            QMessageBox.critical(self, 
-                "Error when searching for updates", 
-                f"An error occurred while trying to check for updates: {e}"
-            )
-
-    def _init_window(self):       
-        self.setWindowTitle(self.name)
-        self.setWindowIcon(QIcon(
-            f"{self.current_dir}/resources/icons/icon.ico")
-        )    
-        if self.settings.value("memorize_last_window_size", "false") == "true":
-            size = self.settings.value("window_size")
+    def toggle_autoplay(self):
+        self.autoplay_enabled = not self.autoplay_enabled
+        if self.autoplay_enabled:
+            self.action_autoplay.setChecked(True)
         else:
-            size = QSize(800,600)
-        self.resize(size)
-        self._move_window_to_center()
-        self.raise_()
-        self.activateWindow()
+            self.action_autoplay.setChecked(False)
 
-        if self.settings.value("search_for_updates_at_startup", "true") == "true":
-            self.check_for_updates(startup=True)
+    def add_placeholder_if_empty(self, menu):
+        menu.clear()
+        placeholder_action = QAction("No Tracks Available", self)
+        placeholder_action.setEnabled(False)
+        menu.addAction(placeholder_action)
 
-    def _move_window_to_center(self):    
-        desktop = qApp.desktop().availableGeometry()
-        w, h = desktop.width(), desktop.height()
-        self.move(w//2 - self.width()//2, h//2 - self.height()//2)
+    def handle_tracks_changed(self):
+        self.menu_audio_tracks.clear()
+        self.menu_video_tracks.clear()
+        self.menu_subtitle_tracks.clear()
+
+        def create_no_track_action(menu, action_group, set_track_func):
+            no_track_action = QAction("No Track", self)
+            no_track_action.setData(-1)
+            no_track_action.setCheckable(True)
+            no_track_action.triggered.connect(lambda: set_track_func(None))
+            menu.addAction(no_track_action)
+            action_group.addAction(no_track_action)
+            return no_track_action
+
+        no_audio_track_action = create_no_track_action(self.menu_audio_tracks, self.audio_tracks_group, self.set_audio_track)
+        no_video_track_action = create_no_track_action(self.menu_video_tracks, self.video_tracks_group, self.set_video_track)
+        no_subtitle_track_action = create_no_track_action(self.menu_subtitle_tracks, self.subtitle_tracks_group, self.set_subtitle_track)
+
+        audio_tracks = self.media_player.audioTracks()
+        current_audio_track = self.media_player.activeAudioTrack()
+        
+        for index, track in enumerate(audio_tracks):
+            title = track.stringValue(QMediaMetaData.Title) or "Unknown"
+            language = track.stringValue(QMediaMetaData.Language) or "Unknown"
+            action = QAction(f"{title} ({language})", self)
+            action.setData(index)
+            action.setCheckable(True)
+            action.triggered.connect(lambda checked, idx=index: self.set_audio_track(idx))
+            self.menu_audio_tracks.addAction(action)
+            self.audio_tracks_group.addAction(action)
+            if current_audio_track == index:
+                action.setChecked(True)
+
+        if current_audio_track == -1:
+            no_audio_track_action.setChecked(True)
+
+        video_tracks = self.media_player.videoTracks()
+        current_video_track = self.media_player.activeVideoTrack()
+        
+        for index, track in enumerate(video_tracks):
+            title = track.stringValue(QMediaMetaData.Title) or "Unknown"
+            language = track.stringValue(QMediaMetaData.Language) or "Unknown"
+            action = QAction(f"{title} ({language})", self)
+            action.setData(index)
+            action.setCheckable(True)
+            action.triggered.connect(lambda checked, idx=index: self.set_video_track(idx))
+            self.menu_video_tracks.addAction(action)
+            self.video_tracks_group.addAction(action)
+            if current_video_track == index:
+                action.setChecked(True)
+
+        if current_video_track == -1:
+            no_video_track_action.setChecked(True)
+
+        subtitle_tracks = self.media_player.subtitleTracks()
+        current_subtitle_track = self.media_player.activeSubtitleTrack()
+        
+        for index, track in enumerate(subtitle_tracks):
+            title = track.stringValue(QMediaMetaData.Title) or "Unknown"
+            language = track.stringValue(QMediaMetaData.Language) or "Unknown"
+            action = QAction(f"{title} ({language})", self)
+            action.setData(index)
+            action.setCheckable(True)
+            action.triggered.connect(lambda checked, idx=index: self.set_subtitle_track(idx))
+            self.menu_subtitle_tracks.addAction(action)
+            self.subtitle_tracks_group.addAction(action)
+            if current_subtitle_track == index:
+                action.setChecked(True)
+
+        if current_subtitle_track == -1:
+            no_subtitle_track_action.setChecked(True)
+
+    def set_audio_track(self, index):
+        if index is None or index == -1:
+            self.media_player.setActiveAudioTrack(-1)
+        else:
+            self.media_player.setActiveAudioTrack(index)
+
+    def set_video_track(self, index):
+        if index is None or index == -1:
+            self.media_player.setActiveVideoTrack(-1)
+        else:
+            self.media_player.setActiveVideoTrack(index)
+
+    def set_subtitle_track(self, index):
+        if index is None or index == -1:
+            self.media_player.setActiveSubtitleTrack(-1)
+        else:
+            self.media_player.setActiveSubtitleTrack(index)
+
+    def show_playlist_context_menu(self, pos):
+        menu = QMenu(self)
+        menu.addAction(self.action_play_from_playlist)
+        menu.addSeparator()
+        menu.addAction(self.action_clear)
+        global_pos = self.playlist_widget.mapToGlobal(pos)
+        menu.exec(global_pos)
+
+    def filter_playlist(self, text):
+        for index in range(self.playlist_widget.count()):
+            item = self.playlist_widget.item(index)
+            item.setHidden(text.lower() not in item.text().lower())
+
+    def get_current_item(self):
+        selected_items = self.playlist_widget.selectedItems()
+        if selected_items:
+            return selected_items[0]
+        return None
+
+    def play_selected_item(self):
+        item = self.get_current_item()
+        if item:
+            self.current_index = self.playlist_widget.row(item)
+            file_path = item.text()
+            self.stop_media()
+            self.play_media(file_path)
+
+    def clear_selected_item(self):
+        selected_items = self.playlist_widget.selectedItems()
+        
+        if not selected_items:
+            return
+
+        for item in selected_items:
+            item_index = self.playlist_widget.row(item)
+            file_path = item.text()
+
+            self.playlist.remove(file_path)
+            self.playlist_widget.takeItem(item_index)
+
+            if item_index == self.current_index:
+                if len(self.playlist) > 0:
+                    if item_index >= len(self.playlist):
+                        self.current_index = len(self.playlist) - 1
+                    else:
+                        self.current_index = item_index
+
+                    next_file = self.playlist[self.current_index]
+                    self.stop_media()
+                    self.play_media(next_file)
+                else:
+                    self.clear_all_playlist()
+            elif item_index < self.current_index:
+                self.current_index -= 1
+
+    def clear_all_playlist(self):
+        self.playlist.clear()
+        self.playlist_widget.clear()
+        self.current_index = -1
+
+        self.stop_media()
+        self.setWindowTitle("DEEF Lite Media Player")
+        
+        self.update_playlist_icons()
+        self.add_placeholder_if_empty(self.menu_audio_tracks)
+        self.add_placeholder_if_empty(self.menu_video_tracks)
+        self.add_placeholder_if_empty(self.menu_subtitle_tracks)
+        
+        self.seek_slider.setValue(0)
+        self.total_time_label.setText("00:00")
+        self.elapsed_time_label.setText("00:00")
+        QTimer.singleShot(100, lambda: self.media_player.setSource(QUrl()))
+
+    def clear_except_current(self):
+        if self.current_index >= 0 and self.playlist:
+            current_media = self.playlist[self.current_index]
+            self.playlist = [current_media]
+            self.playlist_widget.clear()
+
+            item = QListWidgetItem(current_media)
+            item.setToolTip(current_media)
+
+            item.setIcon(QIcon(f":/icons/playing_{self.theme}"))
+            self.playlist_widget.addItem(item)
+   
+            self.current_index = 0
+            self.playlist_widget.setCurrentRow(self.current_index)
+        else:
+            self.clear_all_playlist()
+
+        self.update_playlist_icons()
+
+    def update_playlist_icons(self):
+        play_icon = QIcon(f":/icons/play_cricle_{self.theme}")
+        empty_icon = QIcon()
+        
+        for i in range(self.playlist_widget.count()):
+            item = self.playlist_widget.item(i)
+            if i == self.current_index:
+                item.setIcon(play_icon)
+                item.setSelected(True)
+            else:
+                item.setIcon(empty_icon)
+                item.setSelected(False)
+
+    def handle_playback_state_changed(self, state):
+        if state == QMediaPlayer.PlaybackState.PlayingState:
+            self.action_play_pause.setIcon(QIcon(f":/icons/pause_{self.theme}"))
+        elif state == QMediaPlayer.PlaybackState.PausedState:
+            self.action_play_pause.setIcon(QIcon(f":/icons/play_{self.theme}"))
+        elif state == QMediaPlayer.PlaybackState.StoppedState:
+            self.action_play_pause.setIcon(QIcon(f":/icons/play_{self.theme}"))
+        self.media_player_state_label.setText(str(state))
+
+    def handle_media_status_changed(self, status):
+        if status == QMediaPlayer.MediaStatus.EndOfMedia:
+            if self.loop_mode == "single":
+                self.media_player.play()
+            elif self.loop_mode == "playlist" or self.autoplay_enabled:
+                self.play_next()
+            else:
+                self.stop_media()
+        self.media_player_status_label.setText(str(status))
+
+    def handle_media_error_changed(self, error):
+        QMessageBox.critical(self, "Media Player Error", f"{str(error)}: {self.media_player.errorString()}")
+
+    def toggle_play_pause(self):
+        if self.media_player.isPlaying():
+            self.media_player.pause()
+        else:
+            self.media_player.play()
+
+    def stop_media(self):
+        self.media_player.stop()
+
+    def play_next(self):
+        if self.current_index < len(self.playlist) - 1:
+            self.current_index += 1
+            self.stop_media()
+            self.play_media(self.playlist[self.current_index])
+        elif self.loop_mode == "playlist":
+            self.current_index = 0
+            self.stop_media()
+            self.play_media(self.playlist[self.current_index])
+        else:
+            self.stop_media()
+
+    def play_previous(self):
+        if self.current_index > 0:
+            self.current_index -= 1
+            self.stop_media()
+            self.play_media(self.playlist[self.current_index])
+
+    def set_loop_mode(self, mode):
+        self.loop_mode = mode
+        if mode == "single":
+            self.action_loop_single.setChecked(True)
+        elif mode == "playlist":
+            self.action_loop_playlist.setChecked(True)
+        else:
+            self.action_loop_none.setChecked(True)
+
+    def update_playlist_order(self):
+        current_media = self.playlist[self.current_index] if self.current_index != -1 else None
+        new_playlist = []
+        
+        for i in range(self.playlist_widget.count()):
+            item = self.playlist_widget.item(i)
+            new_playlist.append(item.text())
+
+        self.playlist = new_playlist
+
+        if current_media:
+            self.current_index = self.playlist.index(current_media)
+
+    def shuffle_playlist(self):
+        if self.playlist:
+            current_media = self.playlist[self.current_index] if self.current_index != -1 else None
+
+            random.shuffle(self.playlist)
+            
+            self.playlist_widget.clear()
+            for media in self.playlist:
+                item = QListWidgetItem(media)
+                item.setToolTip(media)
+                self.playlist_widget.addItem(item)
+
+            if current_media:
+                self.current_index = self.playlist.index(current_media)
+                self.playlist_widget.setCurrentRow(self.current_index)
+            
+            self.update_playlist_icons()
+
+    def update_slider_position(self, position):
+        self.seek_slider.blockSignals(True)
+        self.seek_slider.setValue(position)
+        self.seek_slider.blockSignals(False)
+        self.elapsed_time_label.setText(self.format_time(position))
+
+    def update_slider_duration(self, duration):
+        self.seek_slider.setRange(0, duration)
+        self.total_time_label.setText(self.format_time(duration))
+
+    def seek_media(self, position):
+        self.media_player.setPosition(position)
+
+    def set_playback_rate(self, rate):
+        self.media_player.setPlaybackRate(rate)
+        self.action_speed_05x.setChecked(rate == 0.5)
+        self.action_speed_1x.setChecked(rate == 1.0)
+        self.action_speed_15x.setChecked(rate == 1.5)
+        self.action_speed_2x.setChecked(rate == 2.0)
+    
+    def format_time(self, ms):
+        seconds = (ms // 1000) % 60
+        minutes = (ms // (1000 * 60)) % 60
+        hours = (ms // (1000 * 60 * 60)) % 24
+        if hours > 0:
+            return f"{hours:02}:{minutes:02}:{seconds:02}"
+        else:
+            return f"{minutes:02}:{seconds:02}"
+        
+    def set_volume(self, value):
+        volume = value / 100.0
+        self.audio_output.setVolume(volume)
+    
+    def update_slider_volume(self, volume):
+        self.volume_slider.setValue(volume * 100)
+    
+    def toggle_mute_unmute(self):
+        if self.audio_output.isMuted():
+            self.action_mute_unmute.setIcon(QIcon(f":/icons/unmute_{self.theme}"))
+            self.audio_output.setMuted(False)
+        else:
+            self.action_mute_unmute.setIcon(QIcon(f":/icons/mute_{self.theme}"))
+            self.audio_output.setMuted(True)
+
+    def toggle_fullscreen(self):
+        if self.isFullScreen():
+            self.showNormal()
+            self.action_fullscreen.setIcon(QIcon(f":/icons/fullscreen_{self.theme}"))
+            self.close_fullscreen_mode()
+        else:
+            self.showFullScreen()
+            self.action_fullscreen.setIcon(QIcon(f":/icons/close_fullscreen_{self.theme}"))
+            self.fullscreen_mode()
+
+    def fullscreen_mode(self):
+        self.menu_bar.hide()
+        self.tool_bar.hide()
+        self.status_bar.hide()
+
+    def close_fullscreen_mode(self):
+        self.menu_bar.show()
+        self.tool_bar.show()
+        self.status_bar.show()
+
+    def check_updates(self):
+        self.update_checker = UpdateChecker()
+        self.update_checker.update_checked.connect(self.handle_update_checked)
+        self.update_checker.start()
+        
+    def handle_update_checked(self, version, download):
+        if pkg_version.parse(self.app.applicationVersion()) < pkg_version.parse(version):
+            msg_box = QMessageBox.question(self, 
+                                               "Update Available", 
+                                               f"A new version {version} is available. Do you want to download it?", 
+                                               QMessageBox.Yes | QMessageBox.No)
+            if msg_box == QMessageBox.Yes:
+                webbrowser.open_new_tab(download)
+                self.quit()
+
+    def about_app(self):
+        description = (f"<h3>DEEF Lite Media Player</h3>"
+            "It is a simple, lightweight and open source cross-platform media player based on Qt6.<br><br>"    
+            f"Version: {self.app.applicationVersion()}<br>"
+            "Created with ♥ by deeffest, 2024")
+        QMessageBox.about(self, "About app", description)
+    
+    def about_qt(self):
+        QMessageBox.aboutQt(self, "About Qt")
+
+    def save_settings(self):
+        self.settings.setValue("geometry", self.saveGeometry())
+        self.settings.setValue("windowState", self.saveState())
+        self.settings.setValue("volume", self.volume_slider.value())
+        self.settings.sync()
+
+    def quit(self):
+        self.save_settings()
+        self.app.quit()
+
+    def contextMenuEvent(self, event):
+        menu = QMenu(self)
+        menu.addAction(self.action_play_pause)
+        menu.addAction(self.action_stop)
+        menu.addSeparator()
+        menu.addAction(self.action_previous)
+        menu.addAction(self.action_next)
+        menu.addSeparator()
+        menu.addAction(self.action_fullscreen)
+        menu.addAction(self.action_quit)
+        menu.exec(event.globalPos())
+
+    def eventFilter(self, obj, event):
+        if obj == self.search_line_edit:
+            if event.type() == QEvent.MouseButtonPress:
+                self.search_line_edit.setFocus()
+            elif event.type() == QEvent.Leave:
+                self.search_line_edit.clearFocus()
+        return super().eventFilter(obj, event)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
             event.acceptProposedAction()
+        else:
+            super().dragEnterEvent(event)
+
+    def dragMoveEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
+        else:
+            super().dragMoveEvent(event)
 
     def dropEvent(self, event):
         if event.mimeData().hasUrls():
-            self.playlist_cleaner()
-            file_paths = []
-            for url in event.mimeData().urls():
-                file_path = url.toLocalFile()
-                if os.path.isfile(file_path) and self.is_media_file(file_path):
-                    file_paths.append(os.path.join(file_path))
-                elif os.path.isdir(file_path):
-                    directory = file_path
-                    for file in os.listdir(directory):
-                        file_path = os.path.join(directory, file)
-                        if os.path.isfile(file_path) and self.is_media_file(file_path):
-                            ext = file_path.rsplit(".", 1)[-1].lower()
-                            if ext != "m3u":
-                                file_paths.append(file_path)
+            event.setDropAction(Qt.CopyAction)
+            event.accept()
+            urls = event.mimeData().urls()
 
-            for path in file_paths:
-                if path.endswith('.m3u'):
-                    self.open_playlist(path)
-                else:
-                    self.add_to_playlist(path)
+            files = []
+            for url in urls:
+                if url.isLocalFile():
+                    files.append(url.toLocalFile())
 
-            if file_paths:
-                self.open_media(file_paths[0])
-
-            event.acceptProposedAction()
-
-    def showEvent(self, event):
-        super().showEvent(event)
-        if not self.win_toolbar.window():
-            self.win_toolbar.setWindow(self.windowHandle())
+            if files:
+                self.add_to_playlist(files)
+        else:
+            super().dropEvent(event)
 
     def closeEvent(self, event):
-        event.ignore()
-        if self.settings.value("hide_window_in_tray", "false") == "true":
-            self.hide()
-        else:
-            self.exit_app()
+        self.quit()

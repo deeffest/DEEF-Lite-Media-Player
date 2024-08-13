@@ -1,0 +1,7 @@
+# python
+__pycache__
+
+# deployment
+output
+linux_deploy_config.json
+win_deploy_config.json

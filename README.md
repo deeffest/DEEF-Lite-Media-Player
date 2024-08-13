@@ -1,50 +1,70 @@
-![icon-0](https://github.com/deeffest/DEEF-Lite-Media-Player/assets/117280555/176ed8a3-86d5-4e9d-8663-12050e924032)
+![icon](https://github.com/user-attachments/assets/f98607b1-c289-4c43-962f-3849be02c234)
 
-## DEEF Lite Media Player
+# DEEF Lite Media Player 🎥
 
-Simple application for playing media files on your Windows PC, written in PyQt5 and its QMediaPlayer.
+**DEEF Lite Media Player** is a cross-platform media player designed for simplicity, lightweight performance, and broad compatibility across Windows, Linux, and macOS.
 
-## Screenshots:
+## ✨ Key Features
+- **Cross-Platform Compatibility**  
+  Runs seamlessly on Windows, Linux, and macOS.
 
-![Screenshot_1](https://github.com/deeffest/DEEF-Lite-Media-Player/assets/117280555/89acdef6-9005-4d2a-a5f9-ce1115eb1894)
+- **Playlist Management**  
+  Create, manage, and play your favorite playlists.
 
-## Getting Started:
+- **Flexible Media Options**  
+  Open individual files, entire folders, or URLs with ease.
 
-1. **Download and install LAV Filters:** https://github.com/Nevcairiel/LAVFilters/releases/download/0.79.2/LAVFilters-0.79.2-Installer.exe
+- **Drag and Drop Support**  
+  Effortlessly add files to your playlists by dragging and dropping.
 
-2. **Download and install DLMPlayer-Setup.exe:** https://github.com/deeffest/DEEF-Lite-Media-Player/releases
+- **Comfortable Movie Watching**  
+  Select audio tracks, video tracks, or subtitles for an optimal viewing experience.
 
-> **To use DLMPlayer without LAV Filters:**
-> - You need to set Windows Media Foundation as "Preferred Multimedia Plugin" in the "Player" settings instead of the default DirectShow.
+- **Adaptive Interface**  
+  The interface theme adapts to match your operating system's theme.
 
-## Functionality:
+## 📸 Screenshots
+![Screenshot](https://github.com/user-attachments/assets/156b07ac-58dd-445b-a503-fc3f1ae0faca)
 
-- **Lightweight and easy to use:** DEEF Lite Media Player does not overload your system and provides smooth playback.
+## 🚀 Getting Started
+### Using builds with executable files
+1. Download the archive for your OS from the releases page: [Latest Release](https://github.com/deeffest/DEEF-Lite-Media-Player/releases/latest).
+2. Unzip the archive to any folder.
+3. Go to the folder with the unzipped application and run `dlmplayer.exe` in Windows, `dlmplayer` in Linux.
+> There is no build of the latest version 2.0-beta for macOS, but you can build it yourself from the source code of this repository.
 
-- **Support for a wide range of formats:** DEEF Lite Media Player supports a variety of audio and video formats, allowing you to enjoy virtually any media file.
+### Using the source code
+1. **Install Python**  
+   Ensure Python is installed on your system. Tested on:
+   - Windows 10 (22H2) with Python 3.11.3 (64-bit)
+   - Windows 11 (23H2) with Python 3.12.5 (64-bit)  
+   [Download Python](https://www.python.org/downloads/).
 
-- **Intuitive interface:** DEEF Lite Media Player has a simple and straightforward interface that is easy to learn.
+2. **Clone the Repository**  
+   Clone the repository to your local machine.
 
-- **Customizable:** DEEF Lite Media Player allows you to customize various playback settings so you can personalize your experience.
+3. **Install Dependencies**  
+   In the project directory, install dependencies with:
+   ```
+   pip install -r requirements.txt
+   ```
 
-**DEEF Lite Media Player is a great choice for anyone looking for a simple and reliable way to play media files on their Windows PC.**
+4. **Run the Application**  
+   Start the application with:
+   ```
+   python main.py
+   ```
 
-## References:
+## 🔗 References
+- **Qt:** [Learn More](https://www.qt.io/)
+- **PySide:** [Learn More](https://www.qt.io/qt-for-python)
+- **GitHub Issues:** [Report Issues](https://github.com/deeffest/DEEF-Lite-Media-Player/issues/new/choose)
 
-- **Qt:** https://www.qt.io/
+## 📚 See Also
+- **YouTube Music Desktop Player:** [Explore](https://github.com/deeffest/Youtube-Music-Desktop-Player)
+- **DEEF Lite Image Viewer:** [Explore](https://github.com/deeffest/DEEF-Lite-Image-Viewer)
 
-- **PyQt:** https://riverbankcomputing.com/software/pyqt
+## 📜 License
+DEEF Lite Media Player is distributed under the **GPLv3 license**.
 
-- **Bug Reports:** https://github.com/deeffest/DEEF-Lite-Media-Player/issues/new/choose
-
-## See Also:
-
-- **DEEF Lite Image Viewer:** https://github.com/deeffest/DEEF-Lite-Image-Viewer
-- **Youtube Music Desktop Player:** https://github.com/deeffest/Youtube-Music-Desktop-Player
-
-## License:
-
-DEEF Lite Media Player is distributed under the GPLv3 license.
-
-**Please let us know if you have any questions or suggestions.**
-
+**We’d love to hear your questions or suggestions!** 💬
