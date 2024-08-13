@@ -1,4 +1,4 @@
-![icon-0](https://github.com/deeffest/DEEF-Lite-Media-Player/assets/117280555/176ed8a3-86d5-4e9d-8663-12050e924032)
+![icon](https://github.com/user-attachments/assets/ff7895a1-2e7a-46bd-9f6a-474f3cd0f76d)
 
 ## DEEF Lite Media Player
 
@@ -49,4 +49,3 @@ Simple application for playing media files on your Windows PC, written in PyQt5 
 DEEF Lite Media Player is distributed under the **GPLv3 license**.
 
 **Please let us know if you have any questions or suggestions.**
-
