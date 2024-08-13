@@ -4,6 +4,25 @@
 
 Simple application for playing media files on your Windows PC, written in PyQt5 and its QMediaPlayer.
 
+## ✨ Key Features
+- **Cross-Platform Compatibility**  
+  Runs seamlessly on Windows, Linux, and macOS.
+
+- **Playlist Management**  
+  Create, manage, and play your favorite playlists.
+
+- **Flexible Media Options**  
+  Open individual files, entire folders, or URLs with ease.
+
+- **Drag and Drop Support**  
+  Effortlessly add files to your playlists by dragging and dropping.
+
+- **Comfortable Movie Watching**  
+  Select audio tracks, video tracks, or subtitles for an optimal viewing experience.
+
+- **Adaptive Interface**  
+  The interface theme adapts to match your operating system's theme.
+
 ## 📸 Screenshots
 ![Screenshot](https://github.com/user-attachments/assets/156b07ac-58dd-445b-a503-fc3f1ae0faca)
 
