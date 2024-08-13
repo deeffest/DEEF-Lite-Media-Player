@@ -1,27 +1,8 @@
-![icon](https://github.com/user-attachments/assets/f98607b1-c289-4c43-962f-3849be02c234)
+![icon-0](https://github.com/deeffest/DEEF-Lite-Media-Player/assets/117280555/176ed8a3-86d5-4e9d-8663-12050e924032)
 
-# DEEF Lite Media Player 🎥
+## DEEF Lite Media Player
 
-**DEEF Lite Media Player** is a cross-platform media player designed for simplicity, lightweight performance, and broad compatibility across Windows, Linux, and macOS.
-
-## ✨ Key Features
-- **Cross-Platform Compatibility**  
-  Runs seamlessly on Windows, Linux, and macOS.
-
-- **Playlist Management**  
-  Create, manage, and play your favorite playlists.
-
-- **Flexible Media Options**  
-  Open individual files, entire folders, or URLs with ease.
-
-- **Drag and Drop Support**  
-  Effortlessly add files to your playlists by dragging and dropping.
-
-- **Comfortable Movie Watching**  
-  Select audio tracks, video tracks, or subtitles for an optimal viewing experience.
-
-- **Adaptive Interface**  
-  The interface theme adapts to match your operating system's theme.
+Simple application for playing media files on your Windows PC, written in PyQt5 and its QMediaPlayer.
 
 ## 📸 Screenshots
 ![Screenshot](https://github.com/user-attachments/assets/156b07ac-58dd-445b-a503-fc3f1ae0faca)
@@ -67,4 +48,5 @@
 ## 📜 License
 DEEF Lite Media Player is distributed under the **GPLv3 license**.
 
-**We’d love to hear your questions or suggestions!** 💬
+**Please let us know if you have any questions or suggestions.**
+
