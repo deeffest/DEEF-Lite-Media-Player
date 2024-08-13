@@ -1,8 +1,8 @@
 ![icon](https://github.com/user-attachments/assets/ff7895a1-2e7a-46bd-9f6a-474f3cd0f76d)
 
-## DEEF Lite Media Player
+## DEEF Lite Media Player 🎥
 
-Simple application for playing media files on your Windows PC, written in PyQt5 and its QMediaPlayer.
+DEEF Lite Media Player is a cross-platform media player designed for simplicity, lightweight performance, and broad compatibility across Windows, Linux, and macOS. 
 
 ## ✨ Key Features
 - **Cross-Platform Compatibility**  
