@@ -1,5 +1,3 @@
-![icon](https://github.com/user-attachments/assets/f98607b1-c289-4c43-962f-3849be02c234)
-
 # DEEF Lite Media Player 🎥
 
 **DEEF Lite Media Player** is a cross-platform media player designed for simplicity, lightweight performance, and broad compatibility across Windows, Linux, and macOS.
