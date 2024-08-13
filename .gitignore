@@ -5,3 +5,6 @@ __pycache__
 output
 linux_deploy_config.json
 win_deploy_config.json
+
+#other
+desktop.ini
