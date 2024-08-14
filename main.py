@@ -7,7 +7,7 @@ from PySide6.QtGui import QColor, QPalette
 from core.main_window import MainWindow
 
 name = "DEEF-Lite-Media-Player"
-version = "2.0-beta"
+version = "2.1-beta"
 author = "deeffest"
 website = "deeffest.pythonanywhere.com"
 

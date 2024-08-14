@@ -1,3 +1,16 @@
+## Update 2.1-beta 🎉 (August 14, 2024)
+- Changed main window context menu, now it is different in normal and full screen state.
+- Removed 1000ms delay before playing a new media file.
+- Added "Always on top" action - fixing the player on top of all windows.
+- Playlist is now hidden when switching to full screen mode.
+- Added the following hotkeys:
+    - `Left Arrow`: Rewind 10 seconds.
+    - `Right Arrow`: Fast-forward 10 seconds.
+    - `Esc`: Exit full screen mode.
+- Added more speed settings, namely `0.25x`, `0.75x`, `1.25x`, `1.75x`, `2.5x`.
+- Improved playback scroll slider and volume change slider.
+- Other minor fixes and improvements.
+
 ## Update 2.0-beta 🎉 (August 13, 2024)
 - A complete rebirth and first 2.0-beta release.
 

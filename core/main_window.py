@@ -30,6 +30,7 @@ class MainWindow(QMainWindow):
         self.playlist = []
         self.current_index = -1
         self.autoplay_enabled = False
+        self.was_playlist_visible = False
 
         self.setWindowTitle("DEEF Lite Media Player")
         self.setObjectName("MainWindow")
@@ -161,10 +162,20 @@ class MainWindow(QMainWindow):
         self.menu_speed.setIcon(QIcon(f":/icons/speed_{self.theme}"))
         self.menu_playback.addMenu(self.menu_speed)
 
+        self.action_speed_025x = QAction("0.25x", self)
+        self.action_speed_025x.setCheckable(True)
+        self.action_speed_025x.triggered.connect(lambda: self.set_playback_rate(0.25))
+        self.menu_speed.addAction(self.action_speed_025x)
+
         self.action_speed_05x = QAction("0.5x", self)
         self.action_speed_05x.setCheckable(True)
         self.action_speed_05x.triggered.connect(lambda: self.set_playback_rate(0.5))
         self.menu_speed.addAction(self.action_speed_05x)
+
+        self.action_speed_075x = QAction("0.75x", self)
+        self.action_speed_075x.setCheckable(True)
+        self.action_speed_075x.triggered.connect(lambda: self.set_playback_rate(0.75))
+        self.menu_speed.addAction(self.action_speed_075x)
 
         self.action_speed_1x = QAction("1.0x", self)
         self.action_speed_1x.setCheckable(True)
@@ -172,15 +183,30 @@ class MainWindow(QMainWindow):
         self.action_speed_1x.triggered.connect(lambda: self.set_playback_rate(1.0))
         self.menu_speed.addAction(self.action_speed_1x)
 
+        self.action_speed_125x = QAction("1.25x", self)
+        self.action_speed_125x.setCheckable(True)
+        self.action_speed_125x.triggered.connect(lambda: self.set_playback_rate(1.25))
+        self.menu_speed.addAction(self.action_speed_125x)
+
         self.action_speed_15x = QAction("1.5x", self)
         self.action_speed_15x.setCheckable(True)
         self.action_speed_15x.triggered.connect(lambda: self.set_playback_rate(1.5))
         self.menu_speed.addAction(self.action_speed_15x)
 
+        self.action_speed_175x = QAction("1.75x", self)
+        self.action_speed_175x.setCheckable(True)
+        self.action_speed_175x.triggered.connect(lambda: self.set_playback_rate(1.75))
+        self.menu_speed.addAction(self.action_speed_175x)
+
         self.action_speed_2x = QAction("2.0x", self)
         self.action_speed_2x.setCheckable(True)
         self.action_speed_2x.triggered.connect(lambda: self.set_playback_rate(2.0))
         self.menu_speed.addAction(self.action_speed_2x)
+        
+        self.action_speed_25x = QAction("2.5x", self)
+        self.action_speed_25x.setCheckable(True)
+        self.action_speed_25x.triggered.connect(lambda: self.set_playback_rate(2.5))
+        self.menu_speed.addAction(self.action_speed_25x)
 
         self.menu_audio_tracks = QMenu("Audio Tracks")
         self.menu_playback.addMenu(self.menu_audio_tracks)
@@ -201,6 +227,16 @@ class MainWindow(QMainWindow):
         self.add_placeholder_if_empty(self.menu_audio_tracks)
         self.add_placeholder_if_empty(self.menu_video_tracks)
         self.add_placeholder_if_empty(self.menu_subtitle_tracks)
+
+        self.action_backward_10 = QAction("Backward 10s")
+        self.action_backward_10.setShortcut("Left")
+        self.action_backward_10.triggered.connect(self.backward_10_seconds)
+        self.addAction(self.action_backward_10)
+
+        self.action_forward_10 = QAction("Forward 10s")
+        self.action_forward_10.setShortcut("Right")
+        self.action_forward_10.triggered.connect(self.forward_10_seconds)
+        self.addAction(self.action_forward_10)
 
         self.menu_playlist = QMenu("Playlist")
         self.menu_bar.addMenu(self.menu_playlist)
@@ -259,16 +295,26 @@ class MainWindow(QMainWindow):
         self.menu_view = QMenu("View")
         self.menu_bar.addMenu(self.menu_view)
 
-        self.action_fullscreen = QAction("Fullscreen")
+        self.action_fullscreen = QAction("Full screen")
         self.action_fullscreen.setIcon(QIcon(f":/icons/fullscreen_{self.theme}"))
         self.action_fullscreen.setShortcut("F11")
         self.action_fullscreen.triggered.connect(self.toggle_fullscreen)
         self.menu_view.addAction(self.action_fullscreen)
         self.addAction(self.action_fullscreen)
 
+        self.action_always_on_top = QAction("Always On Top")
+        self.action_always_on_top.setIcon(QIcon(f":/icons/pin_{self.theme}"))
+        self.action_always_on_top.setShortcut("Ctrl+T")
+        self.action_always_on_top.triggered.connect(self.toggle_always_on_top)
+        self.menu_view.addAction(self.action_always_on_top)
+        self.addAction(self.action_always_on_top)
+
         self.action_playlist = self.dock_widget.toggleViewAction()
-        self.action_playlist.setIcon(QIcon(f":/icons/playlist_{self.theme}"))
+        self.action_playlist.setText("Hide Playlist")
+        self.action_playlist.setCheckable(False)
+        self.action_playlist.setIcon(QIcon(f":/icons/close_playlist_{self.theme}"))
         self.action_playlist.setShortcut("Ctrl+P")
+        self.action_playlist.triggered.connect(self.toggle_playlist_visibility)
         self.menu_view.addSeparator()
         self.menu_view.addAction(self.action_playlist)
         self.addAction(self.action_playlist)
@@ -292,11 +338,11 @@ class MainWindow(QMainWindow):
         self.action_about_qt.triggered.connect(self.about_qt)
         self.menu_help.addAction(self.action_about_qt)
 
-        self.seek_slider = ClickableSlider(Qt.Horizontal)
+        self.seek_slider = ClickableSlider()
         self.seek_slider.setCursor(Qt.PointingHandCursor)
         self.seek_slider.valueChanged.connect(self.seek_media)
 
-        self.volume_slider = ClickableSlider(Qt.Horizontal)
+        self.volume_slider = ClickableSlider()
         self.volume_slider.setMaximumWidth(70)
         self.volume_slider.setCursor(Qt.PointingHandCursor)
         self.volume_slider.setRange(0, 100)
@@ -376,7 +422,17 @@ class MainWindow(QMainWindow):
 
         if self.settings.value("windowState") is not None:
             self.restoreState(self.settings.value("windowState"))
+
+        if self.dock_widget.isHidden():
+            self.action_playlist.setText("Show Playlist")
+            self.action_playlist.setIcon(QIcon(f":/icons/playlist_{self.theme}"))
             
+        if self.isFullScreen():
+            self.action_fullscreen.setText("Exit full screen")
+            self.action_fullscreen.setIcon(QIcon(f":/icons/close_fullscreen_{self.theme}"))
+            self.fullscreen_mode()
+            
+        self.installEventFilter(self)
         self.check_updates()
 
         if media_paths:
@@ -485,7 +541,7 @@ class MainWindow(QMainWindow):
             self.media_player.setSource(QUrl.fromLocalFile(media_path))
             self.media_player.play()
 
-        QTimer.singleShot(1000, lambda: go())
+        QTimer.singleShot(0, lambda: go())
 
         file_name = os.path.basename(media_path)
         self.setWindowTitle(f"DEEF Lite Media Player - {file_name}")
@@ -801,13 +857,31 @@ class MainWindow(QMainWindow):
 
     def seek_media(self, position):
         self.media_player.setPosition(position)
+        
+    def backward_10_seconds(self):
+        current_position = self.media_player.position()
+
+        if current_position > 10000:
+            self.media_player.setPosition(current_position - 10000)
+
+    def forward_10_seconds(self):
+        current_position = self.media_player.position()
+        duration = self.media_player.duration()
+
+        if current_position + 10000 < duration:
+            self.media_player.setPosition(current_position + 10000)
 
     def set_playback_rate(self, rate):
         self.media_player.setPlaybackRate(rate)
+        self.action_speed_025x.setChecked(rate == 0.25)
         self.action_speed_05x.setChecked(rate == 0.5)
+        self.action_speed_075x.setChecked(rate == 0.75)
         self.action_speed_1x.setChecked(rate == 1.0)
+        self.action_speed_125x.setChecked(rate == 1.25)
         self.action_speed_15x.setChecked(rate == 1.5)
+        self.action_speed_175x.setChecked(rate == 1.75)
         self.action_speed_2x.setChecked(rate == 2.0)
+        self.action_speed_25x.setChecked(rate == 2.5)
     
     def format_time(self, ms):
         seconds = (ms // 1000) % 60
@@ -833,13 +907,38 @@ class MainWindow(QMainWindow):
             self.action_mute_unmute.setIcon(QIcon(f":/icons/mute_{self.theme}"))
             self.audio_output.setMuted(True)
 
+    def toggle_playlist_visibility(self):
+        if self.dock_widget.isVisible():
+            self.was_playlist_visible = False
+            self.dock_widget.hide()
+            self.action_playlist.setText("Show Playlist")
+            self.action_playlist.setIcon(QIcon(f":/icons/playlist_{self.theme}"))
+        else:
+            self.was_playlist_visible = True
+            self.dock_widget.show()
+            self.action_playlist.setText("Hide Playlist")
+            self.action_playlist.setIcon(QIcon(f":/icons/close_playlist_{self.theme}"))
+
+    def toggle_always_on_top(self):
+        if self.isFullScreen(): 
+            return
+        if self.windowFlags() & Qt.WindowStaysOnTopHint:
+            self.setWindowFlag(Qt.WindowStaysOnTopHint, False)
+            self.action_always_on_top.setIcon(QIcon(f":/icons/pin_{self.theme}"))
+        else:
+            self.setWindowFlag(Qt.WindowStaysOnTopHint, True)
+            self.action_always_on_top.setIcon(QIcon(f":/icons/unpin_{self.theme}"))
+        self.show()
+
     def toggle_fullscreen(self):
         if self.isFullScreen():
             self.showNormal()
+            self.action_fullscreen.setText("Full screen")
             self.action_fullscreen.setIcon(QIcon(f":/icons/fullscreen_{self.theme}"))
             self.close_fullscreen_mode()
         else:
             self.showFullScreen()
+            self.action_fullscreen.setText("Exit full screen")
             self.action_fullscreen.setIcon(QIcon(f":/icons/close_fullscreen_{self.theme}"))
             self.fullscreen_mode()
 
@@ -848,10 +947,23 @@ class MainWindow(QMainWindow):
         self.tool_bar.hide()
         self.status_bar.hide()
 
+        self.was_playlist_visible = self.dock_widget.isVisible()
+
+        if self.was_playlist_visible:
+            self.dock_widget.hide()
+
+        self.action_playlist.setText("Show Playlist")
+        self.action_playlist.setIcon(QIcon(f":/icons/playlist_{self.theme}"))
+
     def close_fullscreen_mode(self):
         self.menu_bar.show()
         self.tool_bar.show()
         self.status_bar.show()
+
+        if self.was_playlist_visible:
+            self.dock_widget.show()
+            self.action_playlist.setText("Hide Playlist")
+            self.action_playlist.setIcon(QIcon(f":/icons/close_playlist_{self.theme}"))
 
     def check_updates(self):
         self.update_checker = UpdateChecker()
@@ -861,9 +973,9 @@ class MainWindow(QMainWindow):
     def handle_update_checked(self, version, download):
         if pkg_version.parse(self.app.applicationVersion()) < pkg_version.parse(version):
             msg_box = QMessageBox.question(self, 
-                                               "Update Available", 
-                                               f"A new version {version} is available. Do you want to download it?", 
-                                               QMessageBox.Yes | QMessageBox.No)
+                "Update Available", 
+                f"A new version {version} is available. Do you want to download it?", 
+                QMessageBox.Yes | QMessageBox.No)
             if msg_box == QMessageBox.Yes:
                 webbrowser.open_new_tab(download)
                 self.quit()
@@ -890,14 +1002,41 @@ class MainWindow(QMainWindow):
 
     def contextMenuEvent(self, event):
         menu = QMenu(self)
-        menu.addAction(self.action_play_pause)
-        menu.addAction(self.action_stop)
-        menu.addSeparator()
-        menu.addAction(self.action_previous)
-        menu.addAction(self.action_next)
-        menu.addSeparator()
-        menu.addAction(self.action_fullscreen)
-        menu.addAction(self.action_quit)
+
+        if self.isFullScreen():
+            menu.addAction(self.action_mute_unmute)
+            menu.addMenu(self.menu_audio_tracks)
+            menu.addMenu(self.menu_video_tracks)
+            menu.addMenu(self.menu_subtitle_tracks)
+            menu.addSeparator()
+            menu.addAction(self.action_play_pause)
+            menu.addAction(self.action_stop)
+            menu.addAction(self.action_previous)
+            menu.addAction(self.action_next)
+            menu.addMenu(self.menu_speed)
+            menu.addSeparator()
+            menu.addMenu(self.menu_loop)
+            menu.addAction(self.action_shuffle)
+            menu.addSeparator()
+            menu.addAction(self.action_fullscreen)
+            menu.addSeparator()
+            menu.addAction(self.action_quit)
+        else:
+            menu.addAction(self.action_playlist)
+            menu.addSeparator()
+            menu.addAction(self.action_fullscreen)
+            menu.addSeparator()
+            menu.addAction(self.action_shuffle)
+            menu.addMenu(self.menu_loop)
+            menu.addSeparator()
+            menu.addMenu(self.menu_audio_tracks)
+            menu.addMenu(self.menu_video_tracks)
+            menu.addMenu(self.menu_subtitle_tracks)
+            menu.addSeparator()
+            menu.addAction(self.action_always_on_top)
+            menu.addSeparator()
+            menu.addAction(self.action_quit)
+
         menu.exec(event.globalPos())
 
     def eventFilter(self, obj, event):
@@ -906,6 +1045,11 @@ class MainWindow(QMainWindow):
                 self.search_line_edit.setFocus()
             elif event.type() == QEvent.Leave:
                 self.search_line_edit.clearFocus()
+        if event.type() == QEvent.KeyPress:
+            if event.key() == Qt.Key_Escape:
+                if self.isFullScreen():
+                    self.toggle_fullscreen()
+                return True
         return super().eventFilter(obj, event)
 
     def dragEnterEvent(self, event):
@@ -925,12 +1069,10 @@ class MainWindow(QMainWindow):
             event.setDropAction(Qt.CopyAction)
             event.accept()
             urls = event.mimeData().urls()
-
             files = []
             for url in urls:
                 if url.isLocalFile():
                     files.append(url.toLocalFile())
-
             if files:
                 self.add_to_playlist(files)
         else:

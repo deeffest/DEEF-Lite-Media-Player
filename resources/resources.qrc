@@ -50,5 +50,11 @@
         <file alias="add_light">icons/light/add.png</file>
         <file alias="shuffle_dark">icons/dark/shuffle.png</file>
         <file alias="shuffle_light">icons/light/shuffle.png</file>
+        <file alias="close_playlist_dark">icons/dark/close_playlist.png</file>
+        <file alias="close_playlist_light">icons/light/close_playlist.png</file>
+        <file alias="pin_dark">icons/dark/pin.png</file>
+        <file alias="pin_light">icons/light/pin.png</file>
+        <file alias="unpin_dark">icons/dark/unpin.png</file>
+        <file alias="unpin_light">icons/light/unpin.png</file>
     </qresource>
 </RCC>

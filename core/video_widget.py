@@ -11,7 +11,6 @@ class VideoWidget(QVideoWidget):
         self.inactivity_timer.timeout.connect(self.hide_cursor)
 
         self.tool_bar_and_status_bar_zone_height = 61
-        self.menu_bar_zone_height = 21
     
         self.setMouseTracking(True)
         self.children()[0].setMouseTracking(True)
@@ -42,8 +41,6 @@ class VideoWidget(QVideoWidget):
 
             window_height = self.parent().height()
             mouse_y = event.y()
-            
-            self.parent().menu_bar.setVisible(mouse_y < self.menu_bar_zone_height)
             
             is_bottom_zone = mouse_y > window_height - self.tool_bar_and_status_bar_zone_height
             self.parent().tool_bar.setVisible(is_bottom_zone)
