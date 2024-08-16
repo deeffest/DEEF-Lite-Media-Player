@@ -527,9 +527,9 @@ class MainWindow(QMainWindow):
         for file in files:
             normalized_file = self.normalize_path(file)
             
-            if normalized_file not in self.playlist:
-                self.playlist.append(normalized_file)
-                if self.is_valid_mime_type(normalized_file) or self.is_valid_url(normalized_file):
+            if self.is_valid_mime_type(normalized_file) or self.is_valid_url(normalized_file):
+                if normalized_file not in self.playlist:
+                    self.playlist.append(normalized_file)
                     item = QListWidgetItem(normalized_file)
                     item.setToolTip(normalized_file)
                     self.playlist_widget.addItem(item)

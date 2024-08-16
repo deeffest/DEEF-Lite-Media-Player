@@ -1,3 +1,7 @@
+## Update 2.1.1-beta 🎉 (August 16, 2024)
+- Fixed a vulnerability that allowed unsupported files to be added to a playlist.
+- The quality of the application icon has been improved.
+
 ## Update 2.1-beta 🎉 (August 14, 2024)
 - Changed main window context menu, now it is different in normal and full screen state.
 - Removed 1000ms delay before playing a new media file.

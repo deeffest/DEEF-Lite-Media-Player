@@ -1,4 +1,4 @@
-![icon](https://github.com/user-attachments/assets/712f1c2e-912c-4295-a6f3-a5340bbb03d4)
+![icon](https://github.com/user-attachments/assets/e2778e41-905c-4798-ad1c-7e82f5b41ce6)
 
 ## DEEF Lite Media Player 🎥
 
