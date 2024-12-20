@@ -1,7 +1,7 @@
 <RCC>
     <qresource prefix="/icons">
-        <file alias="icon_win">icons/icon.ico</file>
-        <file alias="icon_linux">icons/icon.png</file>
+        <file alias="icon">icons/icon.ico</file>
+        <file alias="logo">icons/logo.png</file>
         <file alias="quit_dark">icons/dark/quit.png</file>
         <file alias="quit_light">icons/light/quit.png</file>
         <file alias="play_dark">icons/dark/play.png</file>
@@ -56,5 +56,7 @@
         <file alias="pin_light">icons/light/pin.png</file>
         <file alias="unpin_dark">icons/dark/unpin.png</file>
         <file alias="unpin_light">icons/light/unpin.png</file>
+        <file alias="sort_by_dark">icons/dark/sort_by.png</file>
+        <file alias="sort_by_light">icons/light/sort_by.png</file>
     </qresource>
 </RCC>

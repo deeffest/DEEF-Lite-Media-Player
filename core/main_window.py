@@ -1,7 +1,5 @@
 import os
-import logging
 import platform
-import locale
 import webbrowser
 import mimetypes
 import random
@@ -17,29 +15,30 @@ from .clickable_slider import ClickableSlider
 from .update_checker import UpdateChecker
 from packaging import version as pkg_version
 
-locale.setlocale(locale.LC_ALL, '') 
-
 class MainWindow(QMainWindow):
     def __init__(self, app, theme, media_paths=None, parent=None):
         super().__init__(parent)
         self.app = app
         self.theme = theme
-        self.plaform = platform.system()
         self.settings = QSettings()
         self.loop_mode = None
         self.playlist = []
         self.current_index = -1
         self.autoplay_enabled = False
         self.was_playlist_visible = False
+        if self.settings.contains("sort_option"):
+            self.sort_option = self.settings.value("sort_option")
+        else:
+            self.sort_option = "Date"
+        if self.settings.contains("sort_order"):
+            self.sort_order_descending = self.settings.value("sort_order")
+        else:
+            self.sort_order_descending = True
 
         self.setWindowTitle("DEEF Lite Media Player")
         self.setObjectName("MainWindow")
         self.setAcceptDrops(True)
-
-        if self.plaform == "Windows":
-            self.setWindowIcon(QIcon(":/icons/icon_win"))
-        else:
-            self.setWindowIcon(QIcon(":/icons/icon_linux"))        
+        self.setWindowIcon(QIcon(":/icons/icon"))        
             
         if self.settings.value("geometry") is not None:
             self.restoreGeometry(self.settings.value("geometry"))
@@ -104,7 +103,7 @@ class MainWindow(QMainWindow):
         self.action_quit = QAction("Quit")
         self.action_quit.setIcon(QIcon(f":/icons/quit_{self.theme}"))
         self.action_quit.setShortcut("Ctrl+Q")
-        self.action_quit.triggered.connect(self.quit)
+        self.action_quit.triggered.connect(self.close)
         self.menu_file.addSeparator()
         self.menu_file.addAction(self.action_quit)
         self.addAction(self.action_quit)
@@ -284,6 +283,69 @@ class MainWindow(QMainWindow):
         self.menu_playlist.addAction(self.action_next)
         self.addAction(self.action_next)
 
+        self.sort_by_menu = QMenu("Sort by...", self)
+        self.sort_by_menu.setIcon(QIcon(f":/icons/sort_by_{self.theme}"))
+        self.menu_playlist.addSeparator()
+        self.menu_playlist.addMenu(self.sort_by_menu)
+
+        self.sort_by_date_action = QAction("Date", self)
+        self.sort_by_date_action.setCheckable(True)
+        self.sort_by_date_action.triggered.connect(lambda: self.set_sort_option("Date"))
+
+        self.sort_by_name_action = QAction("Name", self)
+        self.sort_by_name_action.setCheckable(True)
+        self.sort_by_name_action.triggered.connect(lambda: self.set_sort_option("Name"))
+
+        self.sort_by_type_action = QAction("Type", self)
+        self.sort_by_type_action.setCheckable(True)
+        self.sort_by_type_action.triggered.connect(lambda: self.set_sort_option("Type"))
+
+        self.sort_by_size_action = QAction("Size", self)
+        self.sort_by_size_action.setCheckable(True)
+        self.sort_by_size_action.triggered.connect(lambda: self.set_sort_option("Size"))
+
+        if self.sort_option == "Date":
+            self.sort_by_date_action.setChecked(True)
+        elif self.sort_option == "Name":
+            self.sort_by_name_action.setChecked(True)
+        elif self.sort_option == "Type":
+            self.sort_by_type_action.setChecked(True)
+        elif self.sort_option == "Size":
+            self.sort_by_size_action.setChecked(True)
+
+        self.sort_ascending_action = QAction("Ascending", self)
+        self.sort_ascending_action.setCheckable(True)
+        self.sort_ascending_action.triggered.connect(lambda: self.set_sort_order(False))
+
+        self.sort_descending_action = QAction("Descending", self)
+        self.sort_descending_action.setCheckable(True)
+        self.sort_descending_action.triggered.connect(lambda: self.set_sort_order(True))
+
+        if self.sort_order_descending:
+            self.sort_descending_action.setChecked(True)
+            self.sort_ascending_action.setChecked(False)
+        else:
+            self.sort_ascending_action.setChecked(True)
+            self.sort_descending_action.setChecked(False)
+
+        self.sort_group = QActionGroup(self)
+        self.sort_group.addAction(self.sort_by_date_action)
+        self.sort_group.addAction(self.sort_by_name_action)
+        self.sort_group.addAction(self.sort_by_type_action)
+        self.sort_group.addAction(self.sort_by_size_action)
+
+        self.order_group = QActionGroup(self)
+        self.order_group.addAction(self.sort_ascending_action)
+        self.order_group.addAction(self.sort_descending_action)
+
+        self.sort_by_menu.addAction(self.sort_by_date_action)
+        self.sort_by_menu.addAction(self.sort_by_name_action)
+        self.sort_by_menu.addAction(self.sort_by_type_action)
+        self.sort_by_menu.addAction(self.sort_by_size_action)
+        self.sort_by_menu.addSeparator()
+        self.sort_by_menu.addAction(self.sort_ascending_action)
+        self.sort_by_menu.addAction(self.sort_descending_action)
+
         self.action_autoplay = QAction("Autoplay")
         self.action_autoplay.setCheckable(True)
         self.action_autoplay.setShortcut("Ctrl+A")
@@ -324,7 +386,7 @@ class MainWindow(QMainWindow):
 
         self.action_search_for_updates = QAction("Search for Updates")
         self.action_search_for_updates.setIcon(QIcon(f":/icons/search_{self.theme}"))
-        self.action_search_for_updates.triggered.connect(self.check_updates)
+        self.action_search_for_updates.triggered.connect(lambda: self.check_updates(manual_check=True))
         self.menu_help.addAction(self.action_search_for_updates)
 
         self.action_about = QAction("About")
@@ -374,6 +436,41 @@ class MainWindow(QMainWindow):
         self.tool_bar.addAction(self.action_fullscreen)
         self.tool_bar.setContextMenuPolicy(Qt.CustomContextMenu)
         self.addToolBar(Qt.BottomToolBarArea, self.tool_bar)
+        
+        self.context_menu = QMenu(self)
+        self.context_menu.addAction(self.action_playlist)
+        self.context_menu.addSeparator()
+        self.context_menu.addAction(self.action_fullscreen)
+        self.context_menu.addSeparator()
+        self.context_menu.addAction(self.action_shuffle)
+        self.context_menu.addMenu(self.menu_loop)
+        self.context_menu.addSeparator()
+        self.context_menu.addMenu(self.menu_audio_tracks)
+        self.context_menu.addMenu(self.menu_video_tracks)
+        self.context_menu.addMenu(self.menu_subtitle_tracks)
+        self.context_menu.addSeparator()
+        self.context_menu.addAction(self.action_always_on_top)
+        self.context_menu.addSeparator()
+        self.context_menu.addAction(self.action_quit)
+
+        self.full_context_menu = QMenu(self)
+        self.full_context_menu.addAction(self.action_mute_unmute)
+        self.full_context_menu.addMenu(self.menu_audio_tracks)
+        self.full_context_menu.addMenu(self.menu_video_tracks)
+        self.full_context_menu.addMenu(self.menu_subtitle_tracks)
+        self.full_context_menu.addSeparator()
+        self.full_context_menu.addAction(self.action_play_pause)
+        self.full_context_menu.addAction(self.action_stop)
+        self.full_context_menu.addAction(self.action_previous)
+        self.full_context_menu.addAction(self.action_next)
+        self.full_context_menu.addMenu(self.menu_speed)
+        self.full_context_menu.addSeparator()
+        self.full_context_menu.addMenu(self.menu_loop)
+        self.full_context_menu.addAction(self.action_shuffle)
+        self.full_context_menu.addSeparator()
+        self.full_context_menu.addAction(self.action_fullscreen)
+        self.full_context_menu.addSeparator()
+        self.full_context_menu.addAction(self.action_quit)
 
         self.action_play_from_playlist = QAction("Play selected item")
         self.action_play_from_playlist.setIcon(QIcon(f":/icons/play_{self.theme}"))
@@ -433,7 +530,7 @@ class MainWindow(QMainWindow):
             self.fullscreen_mode()
             
         self.installEventFilter(self)
-        self.check_updates()
+        self.check_updates(manual_check=False)
 
         if media_paths:
             self.add_to_playlist(media_paths)
@@ -481,7 +578,7 @@ class MainWindow(QMainWindow):
         folder_dialog.setOption(QFileDialog.ShowDirsOnly, True)
         if folder_dialog.exec():
             selected_folder = folder_dialog.selectedFiles()[0]
-            files = self.get_files_in_folder(selected_folder, recursive=False)
+            files = self.get_files_in_folder(selected_folder)
             valid_files = [file for file in files if self.is_valid_mime_type(file)]
             if valid_files:
                 self.stop_media()
@@ -494,23 +591,32 @@ class MainWindow(QMainWindow):
     def normalize_path(self, path):
         return path.replace('\\', '/')
 
-    def get_files_in_folder(self, folder_path, recursive=False):
+    def set_sort_order(self, descending):
+        self.sort_order_descending = descending
+    
+    def set_sort_option(self, option):
+        self.sort_option = option
+
+    def get_files_in_folder(self, folder_path):
         files = []
         folder_path = self.normalize_path(os.path.normpath(folder_path))
-        
-        if recursive:
-            for root, dirs, file_names in os.walk(folder_path):
-                file_names.sort(key=locale.strxfrm)
-                for file_name in file_names:
-                    file_path = self.normalize_path(os.path.normpath(os.path.join(root, file_name)))
+
+        with os.scandir(folder_path) as entries:
+            entries = [entry for entry in entries if entry.is_file()]
+
+            if self.sort_option == "Date":
+                entries.sort(key=lambda e: e.stat().st_mtime, reverse=self.sort_order_descending)
+            elif self.sort_option == "Name":
+                entries.sort(key=lambda e: e.name.lower(), reverse=self.sort_order_descending)
+            elif self.sort_option == "Type":
+                entries.sort(key=lambda e: os.path.splitext(e.name)[1], reverse=self.sort_order_descending)
+            elif self.sort_option == "Size":
+                entries.sort(key=lambda e: e.stat().st_size, reverse=self.sort_order_descending)
+
+            for entry in entries:
+                file_path = self.normalize_path(os.path.normpath(entry.path))
+                if self.is_valid_mime_type(file_path):
                     files.append(file_path)
-        else:
-            with os.scandir(folder_path) as entries:
-                entries = sorted(entries, key=lambda e: locale.strxfrm(e.name))
-                for entry in entries:
-                    if entry.is_file():
-                        file_path = self.normalize_path(os.path.normpath(entry.path))
-                        files.append(file_path)
 
         return files
     
@@ -831,18 +937,23 @@ class MainWindow(QMainWindow):
         if self.playlist:
             current_media = self.playlist[self.current_index] if self.current_index != -1 else None
 
+            if current_media:
+                self.playlist.remove(current_media)
+
             random.shuffle(self.playlist)
-            
+
+            if current_media:
+                self.playlist.insert(0, current_media)
+
             self.playlist_widget.clear()
             for media in self.playlist:
                 item = QListWidgetItem(media)
                 item.setToolTip(media)
                 self.playlist_widget.addItem(item)
 
-            if current_media:
-                self.current_index = self.playlist.index(current_media)
-                self.playlist_widget.setCurrentRow(self.current_index)
-            
+            self.current_index = 0
+            self.playlist_widget.setCurrentRow(self.current_index)
+
             self.update_playlist_icons()
 
     def update_slider_position(self, position):
@@ -965,25 +1076,45 @@ class MainWindow(QMainWindow):
             self.action_playlist.setText("Hide Playlist")
             self.action_playlist.setIcon(QIcon(f":/icons/close_playlist_{self.theme}"))
 
-    def check_updates(self):
-        self.update_checker = UpdateChecker()
+    def check_updates(self, manual_check=False):
+        self.action_search_for_updates.setEnabled(False)
+
+        self.update_checker = UpdateChecker(manual_check)
         self.update_checker.update_checked.connect(self.handle_update_checked)
+        self.update_checker.update_checked_failed.connect(self.handle_update_checked_failed)
         self.update_checker.start()
         
-    def handle_update_checked(self, version, download):
-        if pkg_version.parse(self.app.applicationVersion()) < pkg_version.parse(version):
-            msg_box = QMessageBox.question(self, 
-                "Update Available", 
-                f"A new version {version} is available. Do you want to download it?", 
-                QMessageBox.Yes | QMessageBox.No)
+    def handle_update_checked(self, version, download, manual_check):
+        current_version = pkg_version.parse(self.app.applicationVersion())
+        latest_version = pkg_version.parse(version)
+
+        if current_version < latest_version:
+            msg_box = QMessageBox.question(
+                self,
+                "Update Available",
+                f"A new version {version} is available. Do you want to download it?",
+                QMessageBox.Yes | QMessageBox.No
+            )
             if msg_box == QMessageBox.Yes:
                 webbrowser.open_new_tab(download)
-                self.quit()
+                self.close()
+        elif manual_check:
+            QMessageBox.information(
+                self,
+                "No Updates",
+                f"You are using the latest version ({self.app.applicationVersion()})."
+            )
+        self.action_search_for_updates.setEnabled(True)
+
+    def handle_update_checked_failed(self, error, manual_check):
+        self.action_search_for_updates.setEnabled(True)
+        if manual_check:
+            QMessageBox.critical(self, "Update Check Failed", f"Failed to check for updates: {error}")
 
     def about_app(self):
         description = (f"<h3>DEEF Lite Media Player</h3>"
-            "It is a simple, lightweight and open source cross-platform media player based on Qt6.<br><br>"    
-            f"Version: {self.app.applicationVersion()}<br>"
+            "It is a simple, lightweight and open source cross-platform media player based on Qt (PySide6).<br><br>"    
+            f"{self.app.applicationVersion()}<br>"
             "Created with ♥ by deeffest, 2024")
         QMessageBox.about(self, "About app", description)
     
@@ -994,50 +1125,15 @@ class MainWindow(QMainWindow):
         self.settings.setValue("geometry", self.saveGeometry())
         self.settings.setValue("windowState", self.saveState())
         self.settings.setValue("volume", self.volume_slider.value())
+        self.settings.setValue("sort_option", self.sort_option)
+        self.settings.setValue("sort_order", self.sort_order_descending)
         self.settings.sync()
 
-    def quit(self):
-        self.save_settings()
-        self.app.quit()
-
     def contextMenuEvent(self, event):
-        menu = QMenu(self)
-
         if self.isFullScreen():
-            menu.addAction(self.action_mute_unmute)
-            menu.addMenu(self.menu_audio_tracks)
-            menu.addMenu(self.menu_video_tracks)
-            menu.addMenu(self.menu_subtitle_tracks)
-            menu.addSeparator()
-            menu.addAction(self.action_play_pause)
-            menu.addAction(self.action_stop)
-            menu.addAction(self.action_previous)
-            menu.addAction(self.action_next)
-            menu.addMenu(self.menu_speed)
-            menu.addSeparator()
-            menu.addMenu(self.menu_loop)
-            menu.addAction(self.action_shuffle)
-            menu.addSeparator()
-            menu.addAction(self.action_fullscreen)
-            menu.addSeparator()
-            menu.addAction(self.action_quit)
+            self.full_context_menu.exec(event.globalPos())
         else:
-            menu.addAction(self.action_playlist)
-            menu.addSeparator()
-            menu.addAction(self.action_fullscreen)
-            menu.addSeparator()
-            menu.addAction(self.action_shuffle)
-            menu.addMenu(self.menu_loop)
-            menu.addSeparator()
-            menu.addMenu(self.menu_audio_tracks)
-            menu.addMenu(self.menu_video_tracks)
-            menu.addMenu(self.menu_subtitle_tracks)
-            menu.addSeparator()
-            menu.addAction(self.action_always_on_top)
-            menu.addSeparator()
-            menu.addAction(self.action_quit)
-
-        menu.exec(event.globalPos())
+            self.context_menu.exec(event.globalPos())
 
     def eventFilter(self, obj, event):
         if obj == self.search_line_edit:
@@ -1079,4 +1175,5 @@ class MainWindow(QMainWindow):
             super().dropEvent(event)
 
     def closeEvent(self, event):
-        self.quit()
+        self.save_settings()
+        super().closeEvent(event)

@@ -1,13 +1,14 @@
 import os
 import sys
 import logging
+from logging.handlers import RotatingFileHandler
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QPalette
 from core.main_window import MainWindow
 
 name = "DEEF-Lite-Media-Player"
-version = "2.1.1-beta"
+version = "v2.2.0"
 author = "deeffest"
 website = "deeffest.pythonanywhere.com"
 
@@ -15,13 +16,20 @@ def setup_logging():
     log_dir = os.path.join(os.path.expanduser("~"), name, "logs")
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
+
     log_file = os.path.join(log_dir, "app.log")
+    rotating_handler = RotatingFileHandler(
+        log_file, maxBytes=5 * 1024 * 1024, backupCount=5
+    )
+    rotating_handler.setLevel(logging.INFO)
+    rotating_handler.setFormatter(logging.Formatter(
+        '[%(asctime)s] %(message)s', datefmt='%Y.%m.%d %H:%M:%S'
+    ))
 
     logging.basicConfig(
         level=logging.INFO,
-        format="%(asctime)s - %(levelname)s - %(message)s",
         handlers=[
-            logging.FileHandler(log_file, encoding='utf-8'),
+            rotating_handler,
             logging.StreamHandler(sys.stdout)
         ]
     )
@@ -47,7 +55,6 @@ def customize_palette(app, is_dark):
 
 if __name__ == "__main__":
     setup_logging()
-    os.environ['QT_MEDIA_BACKEND'] = "ffmpeg"
 
     app = QApplication(sys.argv)
     app.setApplicationName(name)

@@ -1,3 +1,10 @@
+v2.2.0 is Here! (21.12.2024)
+- Shuffling a playlist now moves the active media file to the top of the playlist.
+- Manually searching for updates now shows a message box with information about the update not found.
+- Added the ability to change the sorting of images in a folder.
+- Qt (PySide6) updated to 6.8.1
+- Other minor fixes and improvements.
+
 ## Update 2.1.1-beta 🎉 (August 16, 2024)
 - Fixed a vulnerability that allowed unsupported files to be added to a playlist.
 - The quality of the application icon has been improved.
