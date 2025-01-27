@@ -44,7 +44,6 @@ Crosst-platform media player that tries to stick to the principles: **fast**, **
 ## See also
 - [deeffest/DEEF-Lite-Image-Viewer](https://github.com/deeffest/DEEF-Lite-Image-Viewer): Сross-platform image viewer. 
 - [deeffest/Youtube-Music-Desktop-Player](https://github.com/deeffest/Youtube-Music-Desktop-Player): Turns the YT Music site into a desktop application. 
-- [deeffest/Qt-Multimedia-Player](https://github.com/deeffest/Qt-Multimedia-Player): Media Player Example from doc.qt.io with fixes. 
 
 ## License
 The DEEF Lite Media Player is distributed under the **GPLv3 license**.
