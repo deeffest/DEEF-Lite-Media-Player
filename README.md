@@ -42,8 +42,7 @@ Crosst-platform media player that tries to stick to the principles: **fast**, **
    Open the extracted folder, then run the executable file to start the DLMPlayer.
 
 ## See also
-- [deeffest/DEEF-Lite-Image-Viewer](https://github.com/deeffest/DEEF-Lite-Image-Viewer): Сross-platform image viewer. 
-- [deeffest/Youtube-Music-Desktop-Player](https://github.com/deeffest/Youtube-Music-Desktop-Player): Turns the YT Music site into a desktop application. 
+- [deeffest/DEEF-Lite-Image-Viewer](https://github.com/deeffest/DEEF-Lite-Image-Viewer): Сross-platform image viewer.
 
 ## License
 The DEEF Lite Media Player is distributed under the **GPLv3 license**.
